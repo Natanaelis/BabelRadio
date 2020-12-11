@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="128dp"
+    android:padding="13dp">
+
+    <RelativeLayout
+        android:id="@+id/icon_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/app_icon"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_alignParentTop="true"
+            android:tint="@color/gray"
+            android:src="@mipmap/icons8_radio_tower_noti" />
+
+        <TextView
+            android:id="@+id/channel_name_text"
+            android:layout_centerHorizontal="@+id/app_icon"
+            android:layout_toRightOf="@+id/app_icon"
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Radio Channel"
+            android:textSize="12dp"
+            android:textColor="@color/black"/>
+
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/app_icon"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:src="@mipmap/icons8_x"/>
+
+        <ImageView
+            android:id="@+id/channel_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignLeft="@+id/app_icon"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/app_icon"
+            android:src="@drawable/ic_launcher_background"/>
+
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/channel_icon"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="14dp"
+            android:textColor="@color/black"
+            android:textStyle="normal"/>
+
+        <TextView
+            android:id="@+id/artist_text"
+            android:layout_toRightOf="@+id/channel_icon"
+            android:layout_alignTop="@+id/channel_icon"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="3dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artist"
+            android:textSize="14dp"
+            android:maxLength="30"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_below="@+id/artist_text"
+            android:layout_alignLeft="@+id/artist_text"
+            android:layout_alignBottom="@+id/channel_icon"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textSize="14dp"
+            android:maxLength="30"
+            android:textColor="@color/black"
+            android:textStyle="normal"/>
+
+        <ImageButton
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/status_text"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="-32dp"
+            android:scaleX="0.4"
+            android:scaleY="0.4"
+            android:backgroundTint="@color/colorWhite"
+            android:tint="@color/black"
+            android:src="@mipmap/button_forward"/>
+
+        <ImageButton
+            android:id="@+id/play_stop_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/next_button"
+            android:layout_marginRight="-70dp"
+            android:layout_toLeftOf="@+id/next_button"
+            android:scaleX="0.4"
+            android:scaleY="0.4"
+            android:backgroundTint="@color/colorWhite"
+            android:tint="@color/black"
+            android:src="@mipmap/button_play"/>
+
+        <ImageButton
+            android:id="@+id/previous_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="-70dp"
+            android:layout_alignBottom="@+id/play_stop_button"
+            android:layout_toLeftOf="@+id/play_stop_button"
+            android:scaleX="0.4"
+            android:scaleY="0.4"
+            android:tint="@color/black"
+            android:backgroundTint="@color/colorWhite"
+            android:src="@mipmap/button_rewind"/>
+-->
+    </RelativeLayout>
+
+</RelativeLayout>

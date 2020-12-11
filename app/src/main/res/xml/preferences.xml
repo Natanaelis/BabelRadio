@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Main Settings">
+
+        <CheckBoxPreference
+            android:key="RUN_SERVICE_AFTER_A2DP_CONNECTED"
+            android:title="Launch Player"
+            android:summary="Launch after connecting to bluetooth device"
+            android:defaultValue="true"/>
+
+        <CheckBoxPreference
+            android:key="AUTO_PLAY_AFTER_A2DP_CONNECTED"
+            android:title="Auto Play"
+            android:summary="Play after connecting to bluetooth device"
+            android:defaultValue="false"
+            android:dependency="RUN_SERVICE_AFTER_A2DP_CONNECTED"/>
+
+        <ListPreference
+            android:key="A2DP_DISPLAY_UPDATE_TIME"
+            android:title="Bluetooth Device Update"
+            android:summary="Define time for bluetooth device screen update"
+            android:defaultValue="8000"
+            android:entries="@array/settings_list_preference_titles"
+            android:entryValues="@array/settings_list_preference_values"/>
+
+        <ListPreference
+            android:key="REBUFFERING_DELAY_TIME"
+            android:title="Re-buffering Time"
+            android:summary="Define time for re-buffer after buffer got empty"
+            android:defaultValue="8000"
+            android:entries="@array/settings_list_preference_titles"
+            android:entryValues="@array/settings_list_preference_values"/>
+
+        <ListPreference
+            android:key="METADATA_REFRESH_TIME"
+            android:title="Metadata Refresh Time"
+            android:summary="Define time for updating metadata from a stream"
+            android:defaultValue="12000"
+            android:entries="@array/settings_list_preference_titles"
+            android:entryValues="@array/settings_list_preference_values"/>
+
+        <ListPreference
+            android:key="CHECK_A2DP_DEVICE_DELAY_TIME"
+            android:title="Bluetooth Delay Time"
+            android:summary="Define time for awaiting for bluetooth device"
+            android:defaultValue="15000"
+            android:entries="@array/settings_list_preference_titles"
+            android:entryValues="@array/settings_list_preference_values"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

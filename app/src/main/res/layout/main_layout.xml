@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@mipmap/background_5" >
+
+        <ImageButton
+            android:id="@+id/settingsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="-220dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="-200dp"
+            android:scaleX="0.075"
+            android:scaleY="0.075"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@mipmap/settings" />
+
+        <TextView
+            android:id="@+id/channelTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="150dp"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            android:text="Radio Channel"
+            android:singleLine="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:scrollHorizontally="true"
+            android:textColor="@color/colorWhite" />
+
+        <ImageView
+            android:id="@+id/radioImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/channelTextView"
+            android:layout_marginTop="25dp"
+            android:layout_centerHorizontal="true"
+            app:srcCompat="@drawable/logo_p7_klem" />
+
+        <TextView
+            android:id="@+id/txtArtistTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/radioImage"
+            android:layout_marginTop="20dp"
+            android:layout_centerHorizontal="true"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:text="Artist"
+            android:singleLine="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:scrollHorizontally="true"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/txtTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtArtistTextView"
+            android:layout_marginTop="20dp"
+            android:layout_centerHorizontal="true"
+            android:textSize="18dp"
+            android:textStyle="normal"
+            android:text="Title"
+            android:singleLine="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:scrollHorizontally="true"
+            android:textColor="@color/colorWhite" />
+
+        <ImageButton
+            android:id="@+id/playStopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="25dp"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@mipmap/button_play" />
+
+        <ImageButton
+            android:id="@+id/previousButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/playStopButton"
+            android:layout_toLeftOf="@+id/playStopButton"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@mipmap/button_rewind" />
+
+        <ImageButton
+            android:id="@+id/nextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/playStopButton"
+            android:layout_toRightOf="@+id/playStopButton"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@mipmap/button_forward" />
+
+        <ImageView
+            android:id="@+id/separation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/playStopButton"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@mipmap/base" />
+
+        <TextView
+            android:id="@+id/txtPlayerStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/separation"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            android:textSize="16dp"
+            android:textStyle="normal"
+            android:text="Status"
+            android:textColor="@color/colorWhite" />
+
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
