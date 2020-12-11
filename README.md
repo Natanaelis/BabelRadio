@@ -20,7 +20,7 @@ To enable smooth playing below features have been implemented:
 * Controlled by Bluetooth buttons (car audio system, Bluetooth speakers etc.)
 * Reads stream meta-data about artist, song title etc.
 * Displays stream meta-data on connected Bluetooth device screen (car audio system, home hi-fi system etc.)
-* Auto play after connecting to Bluetooth device (works as service and automatically recognize connected bluetooth device)
+* Auto play after connecting to Bluetooth device (works as service and automatically recognize connected Bluetooth device)
 * Ability to add user stream link
 
 ## Images
