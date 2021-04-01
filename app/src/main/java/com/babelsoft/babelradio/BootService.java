@@ -193,10 +193,11 @@ public class BootService extends Service {
     }
 
     private void closePlayerService() {
-        Intent stopPlayerServiceIntenet = new Intent();
-        stopPlayerServiceIntenet.putExtra("Source", "BootService");
-        stopPlayerServiceIntenet.setAction("ClosePlayerService");
-        sendBroadcast(stopPlayerServiceIntenet);
+        Intent stopPlayerServiceIntent = new Intent();
+        stopPlayerServiceIntent.putExtra("Source", "BootService");
+//        stopPlayerServiceIntent.setAction("ClosePlayerService");
+        stopPlayerServiceIntent.setAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
+        sendBroadcast(stopPlayerServiceIntent);
     }
 
     private void getListOfPairedBluetoothDevices() {

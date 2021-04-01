@@ -27,8 +27,7 @@ public class BabelRadioApp extends AppCompatActivity {
     private static ImageButton btnNext;
     private static ImageButton btnSettings;
     private BroadcastReceiver controlReceiver;
-//    private String PLAYER_STATUS_TEXT = "Ready";
-    private String playerStatusText = PlayerService.playerStatus.getText();
+    private String playerStatusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,21 +65,21 @@ public class BabelRadioApp extends AppCompatActivity {
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendBroadcast(new Intent("PlayStop"));
+                sendBroadcast(new Intent(ControlAction.PLAY_STOP.name()));
             }
         });
 
         btnPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendBroadcast(new Intent("Previous"));
+                sendBroadcast(new Intent(ControlAction.PREVIOUS.name()));
             }
         });
 
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendBroadcast(new Intent("Next"));
+                sendBroadcast(new Intent(ControlAction.NEXT.name()));
             }
         });
 
@@ -109,37 +108,30 @@ public class BabelRadioApp extends AppCompatActivity {
         controlReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                switch (intent.getAction()) {
-                    case "UpdateScreen":
-                        updateScreen(intent);
-                        break;
-                    case "ClosePlayerService":
-                        String source = intent.getStringExtra("Source");
-                        if (source.equals("Notification")) {
-                            finish();
-                        }
-                        break;
+                String action = intent.getAction();
+                if (action == ControlAction.UPDATE_SCREEN.name()) updateScreen(intent);
+                else if (action == ControlAction.CLOSE_PLAYER_SERVICE.name()) {
+                    String source = intent.getStringExtra("Source");
+                    if (source.equals("Notification")) {
+                        finish();
+                    }
                 }
             }
         };
 
         IntentFilter controlsFilter = new IntentFilter();
-        controlsFilter.addAction("UpdateScreen");
-        controlsFilter.addAction("ClosePlayerService");
+        controlsFilter.addAction(ControlAction.UPDATE_SCREEN.name());
+        controlsFilter.addAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
 
         registerReceiver(controlReceiver, controlsFilter);
     }
 
     private void updateScreen(Intent intent) {
-
-//        PLAYER_STATUS_TEXT = intent.getStringExtra("Player_Status");
-
         String channelTextNew = intent.getStringExtra("Channel_Name");
         String channelTextOld = txtChannel.getText().toString();
         if (!channelTextNew.equals(channelTextOld)) {
             txtChannel.setText(channelTextNew);
         }
-//        txtPlayerStatusTextView.setText(PLAYER_STATUS_TEXT);
         playerStatusText = PlayerService.playerStatus.getText();
         txtPlayerStatusTextView.setText(playerStatusText);
         txtArtistTextView.setText(intent.getStringExtra("Artist"));
@@ -147,17 +139,16 @@ public class BabelRadioApp extends AppCompatActivity {
 
         imgRadioImage.setImageResource(intent.getIntExtra("Image", 0));
 
-//        if (PLAYER_STATUS_TEXT.equals("Ready")) btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
         if (PlayerService.playerStatus == PlayerStatus.READY)
             btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
         else btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_stop));
     }
 
     private void stopPlayerService() {
-        Intent stopPlayerServiceIntenet = new Intent();
-        stopPlayerServiceIntenet.putExtra("Source", "BabelRadioApp");
-        stopPlayerServiceIntenet.setAction("ClosePlayerService");
-        sendBroadcast(stopPlayerServiceIntenet);
+        Intent stopPlayerServiceIntent = new Intent();
+        stopPlayerServiceIntent.putExtra("Source", "BabelRadioApp");
+        stopPlayerServiceIntent.setAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
+        sendBroadcast(stopPlayerServiceIntent);
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {
@@ -178,7 +169,7 @@ public class BabelRadioApp extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        sendBroadcast(new Intent("RequestUpdateScreen"));
+        sendBroadcast(new Intent(ControlAction.REQUEST_UPDATE_SCREEN.name()));
     }
 
     @Override

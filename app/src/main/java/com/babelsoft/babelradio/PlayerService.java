@@ -167,28 +167,22 @@ public class PlayerService extends Service {
                 if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (event.getKeyCode()) {
                         case KeyEvent.KEYCODE_MEDIA_STOP:
-                            sendBroadcast(new Intent("Stop"));
-                            Log.i("Test", "Stop");
+                            sendBroadcast(new Intent(ControlAction.STOP.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                            sendBroadcast(new Intent("Pause"));
-                            Log.i("Test", "Pause");
+                            sendBroadcast(new Intent(ControlAction.PAUSE.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PLAY:
-                            sendBroadcast(new Intent("Play"));
-                            Log.i("Test", "Play");
+                            sendBroadcast(new Intent(ControlAction.PLAY.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                            sendBroadcast(new Intent("Pause"));
-                            Log.i("Test", "Pause");
+                            sendBroadcast(new Intent(ControlAction.PAUSE.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
-                            sendBroadcast(new Intent("Next"));
-                            Log.i("Test", "Next");
+                            sendBroadcast(new Intent(ControlAction.NEXT.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                            sendBroadcast(new Intent("Previous"));
-                            Log.i("Test", "Previous");
+                            sendBroadcast(new Intent(ControlAction.PREVIOUS.name()));
                             break;
                     }
                 }
@@ -206,61 +200,46 @@ public class PlayerService extends Service {
         controlReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                switch (intent.getAction()) {
-                    case "Stop":
-                        onStopClick();
-                        break;
-                    case "Play":
-                        onPlayClick();
-                        break;
-                    case "PlayStop":
-                        if (playerStatus == PlayerStatus.READY) onPlayClick();
-                        else onStopClick();
-                        break;
-                    case "Pause":
-                        onPauseClick();
-                        break;
-                    case "Next":
-                        onNextClick();
-                        break;
-                    case "Previous":
-                        onPreviousClick();
-                        break;
-                    case "ClosePlayerService":
-                        String source = intent.getStringExtra("Source");
-                        if (source.equals("BabelRadioApp")) {
-                            if (playerStatus == PlayerStatus.READY) {
-                                stopSelf();
-                            }
-                        }
-                        else if (source.equals("BootService")) {
-                            if (isActivityRunning()) onStopClick();
-                            else stopSelf();
-                        }
-                        else if (source.equals("Notification")) {
+                String action = intent.getAction();
+                if (action == ControlAction.STOP.name()) onStopClick();
+                else if (action == ControlAction.PLAY.name()) onPlayClick();
+                else if (action == ControlAction.PLAY_STOP.name()) {
+                    if (playerStatus == PlayerStatus.READY) onPlayClick();
+                    else onStopClick();
+                }
+                else if (action == ControlAction.PAUSE.name()) onPauseClick();
+                else if (action == ControlAction.NEXT.name()) onNextClick();
+                else if (action == ControlAction.PREVIOUS.name()) onPreviousClick();
+                else if (action == ControlAction.CLOSE_PLAYER_SERVICE.name()) {
+                    String source = intent.getStringExtra("Source");
+                    if (source.equals("BabelRadioApp")) {
+                        if (playerStatus == PlayerStatus.READY) {
                             stopSelf();
                         }
-                        break;
-                    case "UpdateScreen":
-                        updateNotification(intent);
-                        break;
-                    case "RequestUpdateScreen":
-                        updateScreen();
-                        break;
+                    }
+                    else if (source.equals("BootService")) {
+                        if (isActivityRunning()) onStopClick();
+                        else stopSelf();
+                    }
+                    else if (source.equals("Notification")) {
+                        stopSelf();
+                    }
                 }
+                else if (action == ControlAction.UPDATE_SCREEN.name()) updateNotification(intent);
+                else if (action == ControlAction.REQUEST_UPDATE_SCREEN.name()) updateScreen();
             }
         };
 
         IntentFilter controlsFilter = new IntentFilter();
-        controlsFilter.addAction("Stop");
-        controlsFilter.addAction("Play");
-        controlsFilter.addAction("PlayStop");
-        controlsFilter.addAction("Pause");
-        controlsFilter.addAction("Next");
-        controlsFilter.addAction("Previous");
-        controlsFilter.addAction("ClosePlayerService");
-        controlsFilter.addAction("UpdateScreen");
-        controlsFilter.addAction("RequestUpdateScreen");
+        controlsFilter.addAction(ControlAction.STOP.name());
+        controlsFilter.addAction(ControlAction.PLAY.name());
+        controlsFilter.addAction(ControlAction.PLAY_STOP.name());
+        controlsFilter.addAction(ControlAction.PAUSE.name());
+        controlsFilter.addAction(ControlAction.NEXT.name());
+        controlsFilter.addAction(ControlAction.PREVIOUS.name());
+        controlsFilter.addAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
+        controlsFilter.addAction(ControlAction.UPDATE_SCREEN.name());
+        controlsFilter.addAction(ControlAction.REQUEST_UPDATE_SCREEN.name());
 
         registerReceiver(controlReceiver, controlsFilter);
     }
@@ -299,23 +278,23 @@ public class PlayerService extends Service {
 
     private void setNotificationButtonsListener(RemoteViews view) {
         //listener 1
-        Intent nextButtonIntent = new Intent("Next");
+        Intent nextButtonIntent = new Intent(ControlAction.NEXT.name());
         PendingIntent nextButtonPendingIntent = PendingIntent.getBroadcast(this, 1, nextButtonIntent, 0);
         view.setOnClickPendingIntent(R.id.next_button, nextButtonPendingIntent);
 
         //listener 2
-        Intent playStopButtonIntent = new Intent("PlayStop");
+        Intent playStopButtonIntent = new Intent(ControlAction.PLAY_STOP.name());
         PendingIntent playStopButtonPendingIntent = PendingIntent.getBroadcast(this, 1, playStopButtonIntent, 0);
         view.setOnClickPendingIntent(R.id.play_stop_button, playStopButtonPendingIntent);
 
         //listener 3
-        Intent closeButtonIntent = new Intent("ClosePlayerService");
+        Intent closeButtonIntent = new Intent(ControlAction.CLOSE_PLAYER_SERVICE.name());
         closeButtonIntent.putExtra("Source", "Notification");
         PendingIntent closeButtonPendingIntent = PendingIntent.getBroadcast(this, 0, closeButtonIntent, 0);
         view.setOnClickPendingIntent(R.id.close_button, closeButtonPendingIntent);
 
         //listener 4
-        Intent previousButtonIntent = new Intent("Previous");
+        Intent previousButtonIntent = new Intent(ControlAction.PREVIOUS.name());
         PendingIntent previousButtonPendingIntent = PendingIntent.getBroadcast(this, 1, previousButtonIntent, 0);
         view.setOnClickPendingIntent(R.id.previous_button, previousButtonPendingIntent);
     }
@@ -459,7 +438,7 @@ public class PlayerService extends Service {
 
     private void updateScreen() {
         Intent updateUpdateScreenIntent = new Intent();
-        updateUpdateScreenIntent.setAction("UpdateScreen");
+        updateUpdateScreenIntent.setAction(ControlAction.UPDATE_SCREEN.name());
         updateUpdateScreenIntent.putExtra("Channel_Name", radioChannels[currentChannelTableNumber].getChannelName());
         updateUpdateScreenIntent.putExtra("Player_Status", playerStatus.getText());
         updateUpdateScreenIntent.putExtra("Artist", ARTIST_TEXT);
