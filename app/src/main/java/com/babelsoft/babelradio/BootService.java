@@ -129,7 +129,8 @@ public class BootService extends Service {
                                 a2dpDeviceName = device.getName();
                                 Log.i(TAG, "BluetoothA2dp Device Disconnected: " + a2dpDeviceName);
                                 isBluetoothA2dpConnected = false;
-                                if (isServiceRunning(PlayerService.class)) closePlayerService();
+                                ProcessControl pc = new ProcessControl();
+                                if (pc.isServiceRunning(PlayerService.class, getApplicationContext())) closePlayerService();
                             }
                         }
                     }
@@ -178,24 +179,14 @@ public class BootService extends Service {
         }
     }
 
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                    return true;
-            }
-        }
-        return false;
-    }
-
     private void launchPlayerService() {
-        if (!isServiceRunning(PlayerService.class)) startForegroundService(new Intent(this, PlayerService.class));
+        ProcessControl pc = new ProcessControl();
+        if (!pc.isServiceRunning(PlayerService.class, getApplicationContext())) startForegroundService(new Intent(this, PlayerService.class));
     }
 
     private void closePlayerService() {
         Intent stopPlayerServiceIntent = new Intent();
         stopPlayerServiceIntent.putExtra("Source", "BootService");
-//        stopPlayerServiceIntent.setAction("ClosePlayerService");
         stopPlayerServiceIntent.setAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
         sendBroadcast(stopPlayerServiceIntent);
     }

@@ -1,6 +1,5 @@
 package com.babelsoft.babelradio;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -92,14 +91,14 @@ public class BabelRadioApp extends AppCompatActivity {
 
         Window w = getWindow();
         w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-
     }
 
     private void initializeServices() {
-        if (!isServiceRunning(BootService.class)) {
+        ProcessControl pc = new ProcessControl();
+        if (!pc.isServiceRunning(BootService.class, this)) {
             startForegroundService(new Intent(this, BootService.class));
         }
-        if (!isServiceRunning(PlayerService.class)) {
+        if (!pc.isServiceRunning(PlayerService.class, this)) {
             startForegroundService(new Intent(this, PlayerService.class));
         }
     }
@@ -149,16 +148,6 @@ public class BabelRadioApp extends AppCompatActivity {
         stopPlayerServiceIntent.putExtra("Source", "BabelRadioApp");
         stopPlayerServiceIntent.setAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
         sendBroadcast(stopPlayerServiceIntent);
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

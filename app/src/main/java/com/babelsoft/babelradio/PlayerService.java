@@ -1,6 +1,5 @@
 package com.babelsoft.babelradio;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -29,7 +28,6 @@ import android.view.KeyEvent;
 import android.widget.RemoteViews;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -218,7 +216,8 @@ public class PlayerService extends Service {
                         }
                     }
                     else if (source.equals("BootService")) {
-                        if (isActivityRunning()) onStopClick();
+                        ProcessControl pc = new ProcessControl();
+                        if (pc.isActivityRunning(BabelRadioApp.class, getApplicationContext())) onStopClick();
                         else stopSelf();
                     }
                     else if (source.equals("Notification")) {
@@ -710,31 +709,6 @@ public class PlayerService extends Service {
         TITLE_TEXT = "Title";
     }
 
-    public boolean isActivityRunning() {
-        boolean isActivityFound = false;
-
-        ActivityManager activityManager = (ActivityManager) getBaseContext().getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningTaskInfo> activities = activityManager.getRunningTasks(Integer.MAX_VALUE);
-        for (int i = 0; i < activities.size(); i++) {
-            if (activities.get(i).topActivity.toString().equalsIgnoreCase("ComponentInfo{com.babelsoft.babelradio/com.babelsoft.babelradio.BabelRadioApp}")) {
-                isActivityFound = true;
-                break;
-            }
-        }
-        return isActivityFound;
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                if (service.started && service.foreground) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
     @Override
     public void onDestroy() {
