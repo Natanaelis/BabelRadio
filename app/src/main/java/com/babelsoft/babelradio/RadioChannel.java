@@ -30,7 +30,6 @@ public class RadioChannel {
 
     void setChannelImage(int mchannelImage) {
         channelImage = mchannelImage;
-
     }
 
     int getChannelNumber() {
