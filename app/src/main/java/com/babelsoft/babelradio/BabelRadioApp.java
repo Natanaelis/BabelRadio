@@ -27,8 +27,8 @@ public class BabelRadioApp extends AppCompatActivity {
     private static ImageButton btnNext;
     private static ImageButton btnSettings;
     private BroadcastReceiver controlReceiver;
-    private static String PLAYER_STATUS_TEXT = "Ready";
-    private static String test = "";
+//    private String PLAYER_STATUS_TEXT = "Ready";
+    private String playerStatusText = PlayerService.playerStatus.getText();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,20 +132,24 @@ public class BabelRadioApp extends AppCompatActivity {
 
     private void updateScreen(Intent intent) {
 
-        PLAYER_STATUS_TEXT = intent.getStringExtra("Player_Status");
+//        PLAYER_STATUS_TEXT = intent.getStringExtra("Player_Status");
 
         String channelTextNew = intent.getStringExtra("Channel_Name");
         String channelTextOld = txtChannel.getText().toString();
         if (!channelTextNew.equals(channelTextOld)) {
             txtChannel.setText(channelTextNew);
         }
-        txtPlayerStatusTextView.setText(PLAYER_STATUS_TEXT);
+//        txtPlayerStatusTextView.setText(PLAYER_STATUS_TEXT);
+        playerStatusText = PlayerService.playerStatus.getText();
+        txtPlayerStatusTextView.setText(playerStatusText);
         txtArtistTextView.setText(intent.getStringExtra("Artist"));
         txtTitleTextView.setText(intent.getStringExtra("Title"));
 
         imgRadioImage.setImageResource(intent.getIntExtra("Image", 0));
 
-        if (PLAYER_STATUS_TEXT.equals("Ready")) btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
+//        if (PLAYER_STATUS_TEXT.equals("Ready")) btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
+        if (PlayerService.playerStatus == PlayerStatus.READY)
+            btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
         else btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_stop));
     }
 

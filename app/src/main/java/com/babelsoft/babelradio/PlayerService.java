@@ -39,11 +39,6 @@ public class PlayerService extends Service {
     private BroadcastReceiver controlReceiver;
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
     private int currentVolume;
-    private static final int STATUS_READY = 0;
-    private static final int STATUS_BUFFERING = 1;
-    private static final int STATUS_PLAYING = 2;
-    private static final int STATUS_INTERRUPTED_PAUSE = 3;
-    private static String PLAYER_STATUS_TEXT = "Ready";
     private static String ARTIST_TEXT;
     private static String TITLE_TEXT;
     private static final int LOW_BEEP = 0;
@@ -51,7 +46,8 @@ public class PlayerService extends Service {
     private static final int NEXT_BEEPS = 0;
     private static final int PREVIOUS_BEEPS = 1;
     private static final int REBUFFERING_BEEPS = 2;
-    private int playerStatus = STATUS_READY;
+    public static PlayerStatus playerStatus = PlayerStatus.READY;
+    private PlayerStatus playerPreviousStatus = PlayerStatus.READY;
     private String displayText = null;
     private Timer updateA2dpDisplayTimer;
     private Timer downloadMetaDataTimer;
@@ -61,7 +57,6 @@ public class PlayerService extends Service {
     private final static int BEEP_PLAY_SEPARATION_TIME = 200;
     private RadioChannel radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem;
     private Timer playBeepTimer;
-    private int playerPreviousStatus = STATUS_READY;
     private MediaSession ms;
     IcyStreamMeta streamMeta = new IcyStreamMeta();
     private String notificationChannelId = "Babel Radio";
@@ -96,7 +91,7 @@ public class PlayerService extends Service {
 
         registerChannels();
 
-        playerStatusChanged(STATUS_READY);
+        playerStatusChanged(PlayerStatus.READY);
 
         resetArtistTitle();
 
@@ -219,7 +214,7 @@ public class PlayerService extends Service {
                         onPlayClick();
                         break;
                     case "PlayStop":
-                        if (playerStatus == STATUS_READY) onPlayClick();
+                        if (playerStatus == PlayerStatus.READY) onPlayClick();
                         else onStopClick();
                         break;
                     case "Pause":
@@ -234,7 +229,7 @@ public class PlayerService extends Service {
                     case "ClosePlayerService":
                         String source = intent.getStringExtra("Source");
                         if (source.equals("BabelRadioApp")) {
-                            if (playerStatus == STATUS_READY) {
+                            if (playerStatus == PlayerStatus.READY) {
                                 stopSelf();
                             }
                         }
@@ -279,18 +274,18 @@ public class PlayerService extends Service {
                     case AudioManager.AUDIOFOCUS_GAIN:
                         resetToCurrentVolume();
                         playerStatusChanged(playerPreviousStatus);
-                        if (playerStatus == STATUS_PLAYING || playerStatus == STATUS_BUFFERING) {
+                        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
                             playRadio();
                         }
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS:
                         rememberCurrentVolume();
-                        playerStatusChanged(STATUS_READY);
+                        playerStatusChanged(PlayerStatus.READY);
                         stopPlay();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         rememberCurrentVolume();
-                        playerStatusChanged(STATUS_INTERRUPTED_PAUSE);
+                        playerStatusChanged(PlayerStatus.INTERRUPTED_PAUSE);
                         stopPlay();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
@@ -336,7 +331,7 @@ public class PlayerService extends Service {
         notificationView.setTextViewText(R.id.status_text, intent.getStringExtra("Player_Status"));
         notificationView.setImageViewResource(R.id.channel_icon, intent.getIntExtra("Image", 0));
 
-        if (playerStatus == STATUS_READY) notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_play);
+        if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_play);
         else notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_stop);
 
         showNotification();
@@ -367,8 +362,8 @@ public class PlayerService extends Service {
             updateA2dpDisplayTimer.cancel();
             updateA2dpDisplayTimer = null;
         }
-        if (playerStatus != STATUS_PLAYING) {
-            displayText = radioChannels[currentChannelTableNumber].getChannelName() + " (" + PLAYER_STATUS_TEXT + ")";
+        if (playerStatus != PlayerStatus.PLAYING) {
+            displayText = radioChannels[currentChannelTableNumber].getChannelName() + " (" + playerStatus.getText() + ")";
             updateA2dpDisplay(displayText);
         }
         else {
@@ -380,7 +375,7 @@ public class PlayerService extends Service {
                 public void run() {
                     switch (mode[0]) {
                         case "playing":
-                            displayText = radioChannels[currentChannelTableNumber].getChannelName() + " (" + PLAYER_STATUS_TEXT + ")";
+                            displayText = radioChannels[currentChannelTableNumber].getChannelName() + " (" + playerStatus.getText() + ")";
                             mode[0] = "artist";
                             break;
                         case "artist":
@@ -466,7 +461,7 @@ public class PlayerService extends Service {
         Intent updateUpdateScreenIntent = new Intent();
         updateUpdateScreenIntent.setAction("UpdateScreen");
         updateUpdateScreenIntent.putExtra("Channel_Name", radioChannels[currentChannelTableNumber].getChannelName());
-        updateUpdateScreenIntent.putExtra("Player_Status", PLAYER_STATUS_TEXT);
+        updateUpdateScreenIntent.putExtra("Player_Status", playerStatus.getText());
         updateUpdateScreenIntent.putExtra("Artist", ARTIST_TEXT);
         updateUpdateScreenIntent.putExtra("Title", TITLE_TEXT);
         updateUpdateScreenIntent.putExtra("Image", radioChannels[currentChannelTableNumber].getChannelImage());
@@ -500,38 +495,38 @@ public class PlayerService extends Service {
     }
 
     private void onPlayClick() {
-        if (playerStatus == STATUS_READY) {
+        if (playerStatus == PlayerStatus.READY) {
             playBeeps(REBUFFERING_BEEPS);
             playRadio();
         }
     }
 
     private void onStopClick() {
-        if (playerStatus == STATUS_PLAYING || playerStatus == STATUS_BUFFERING) {
+        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
             playBeep(HIGH_BEEP);
             resetArtistTitle();
-            playerStatusChanged(STATUS_READY);
+            playerStatusChanged(PlayerStatus.READY);
             stopPlay();
         }
     }
 
     private void onPauseClick() {
-        if (playerStatus == STATUS_PLAYING || playerStatus == STATUS_BUFFERING) onStopClick();
-        else if (playerStatus == STATUS_READY) onPlayClick();
+        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) onStopClick();
+        else if (playerStatus == PlayerStatus.READY) onPlayClick();
     }
 
     private void onPreviousClick() {
         playBeeps(PREVIOUS_BEEPS);
-        if (playerStatus != STATUS_INTERRUPTED_PAUSE) {
+        if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
             currentChannelTableNumber--;
             if (currentChannelTableNumber < 0 ) {
                 currentChannelTableNumber = radioChannels.length - 1;
             }
         }
-        if (playerStatus == STATUS_PLAYING || playerStatus == STATUS_BUFFERING) {
+        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
             playRadio();
-        } else if (playerStatus == STATUS_READY){
-            playerStatusChanged(STATUS_READY);
+        } else if (playerStatus == PlayerStatus.READY){
+            playerStatusChanged(PlayerStatus.READY);
         }
         resetArtistTitle();
         updateScreen();
@@ -539,16 +534,16 @@ public class PlayerService extends Service {
 
     private void onNextClick() {
         playBeeps(NEXT_BEEPS);
-        if (playerStatus != STATUS_INTERRUPTED_PAUSE) {
+        if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
             currentChannelTableNumber++;
             if (currentChannelTableNumber > radioChannels.length - 1 ) {
                 currentChannelTableNumber = 0;
             }
         }
-        if (playerStatus == STATUS_PLAYING || playerStatus == STATUS_BUFFERING) {
+        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
             playRadio();
-        } else if (playerStatus == STATUS_READY){
-            playerStatusChanged(STATUS_READY);
+        } else if (playerStatus == PlayerStatus.READY){
+            playerStatusChanged(PlayerStatus.READY);
         }
         resetArtistTitle();
         updateScreen();
@@ -703,25 +698,10 @@ public class PlayerService extends Service {
         playBeepTimer.scheduleAtFixedRate(beep_tt, 0, BEEP_PLAY_SEPARATION_TIME);
     }
 
-    private void playerStatusChanged(int newStatus) {
+    private void playerStatusChanged(PlayerStatus newStatus) {
         if (playerStatus != newStatus) {
             playerPreviousStatus = playerStatus;
             playerStatus = newStatus;
-
-            switch (playerStatus) {
-                case STATUS_READY:
-                    PLAYER_STATUS_TEXT = "Ready";
-                    break;
-                case STATUS_BUFFERING:
-                    PLAYER_STATUS_TEXT = "Buffering";
-                    break;
-                case STATUS_PLAYING:
-                    PLAYER_STATUS_TEXT = "Playing";
-                    break;
-                case STATUS_INTERRUPTED_PAUSE:
-                    PLAYER_STATUS_TEXT = "Paused";
-                    break;
-            }
 
             updateScreen();
             if (am.isBluetoothA2dpOn()) sendTrackInfoToA2dp();
@@ -779,7 +759,7 @@ public class PlayerService extends Service {
 
     @Override
     public void onDestroy() {
-        playerStatusChanged(STATUS_READY);
+        playerStatusChanged(PlayerStatus.READY);
         updateScreen();
         stopPlay();
         cancelNotification();
@@ -791,7 +771,7 @@ public class PlayerService extends Service {
 
     private void playMusic() {
 
-        playerStatusChanged(STATUS_BUFFERING);
+        playerStatusChanged(PlayerStatus.BUFFERING);
         reBufferingCountDown();
 
         try {
@@ -807,10 +787,10 @@ public class PlayerService extends Service {
         mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer player) {
-                if (playerStatus != STATUS_INTERRUPTED_PAUSE) {
+                if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
                     stopBufferingCountDown();
                     mp.start();
-                    playerStatusChanged(STATUS_PLAYING);
+                    playerStatusChanged(PlayerStatus.PLAYING);
                     downloadMetaData();
                 }
             }
