@@ -1,6 +1,5 @@
 package com.babelsoft.babelradio;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Service;
 import android.bluetooth.BluetoothA2dp;
@@ -231,7 +230,7 @@ public class BootService extends Service {
     }
 
     private void playConnectionSound() {
-        final MediaPlayer mp = MediaPlayer.create(this, R.raw.changer_connection);
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.bt_connection);
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {

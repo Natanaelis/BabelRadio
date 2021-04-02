@@ -23,7 +23,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RemoteViews;
 import java.io.IOException;
@@ -41,11 +40,6 @@ public class PlayerService extends Service {
     public static String titleText;
     public static String channelName;
     public static int channelImage;
-    private static final int LOW_BEEP = 0;
-    private static final int HIGH_BEEP = 1;
-    private static final int NEXT_BEEPS = 0;
-    private static final int PREVIOUS_BEEPS = 1;
-    private static final int REBUFFERING_BEEPS = 2;
     public static PlayerStatus playerStatus = PlayerStatus.READY;
     private PlayerStatus playerPreviousStatus = PlayerStatus.READY;
     private String displayText = null;
@@ -58,7 +52,7 @@ public class PlayerService extends Service {
     private RadioChannel radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem;
     private Timer playBeepTimer;
     private MediaSession ms;
-    IcyStreamMeta streamMeta = new IcyStreamMeta();
+    private IcyStreamMeta streamMeta = new IcyStreamMeta();
     private String notificationChannelId = "Babel Radio";
     private String notificationChannelName = "Babel Radio Notification";
     private final static int NOTIFICATION_ID = 78;
@@ -472,14 +466,14 @@ public class PlayerService extends Service {
 
     private void onPlayClick() {
         if (playerStatus == PlayerStatus.READY) {
-            playBeeps(REBUFFERING_BEEPS);
+            playBeep(Beep.BUFFERING);
             playRadio();
         }
     }
 
     private void onStopClick() {
         if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
-            playBeep(HIGH_BEEP);
+            playBeep(Beep.STOP);
             resetArtistTitle();
             playerStatusChanged(PlayerStatus.READY);
             stopPlay();
@@ -492,7 +486,7 @@ public class PlayerService extends Service {
     }
 
     private void onPreviousClick() {
-        playBeeps(PREVIOUS_BEEPS);
+        playBeep(Beep.PREVIOUS);
         if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
             currentChannelTableNumber--;
             if (currentChannelTableNumber < 0 ) {
@@ -510,7 +504,7 @@ public class PlayerService extends Service {
     }
 
     private void onNextClick() {
-        playBeeps(NEXT_BEEPS);
+        playBeep(Beep.NEXT);
         if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
             currentChannelTableNumber++;
             if (currentChannelTableNumber > radioChannels.length - 1 ) {
@@ -540,8 +534,7 @@ public class PlayerService extends Service {
             }
 
             public void onFinish() {
-                Log.i("Test", "reBufferingCountDown started");
-                playBeeps(REBUFFERING_BEEPS);
+                playBeep(Beep.BUFFERING);
                 playRadio();
             }
         }.start();
@@ -601,15 +594,14 @@ public class PlayerService extends Service {
         radioChannels = new RadioChannel[]{radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem};
     }
 
-    private void playBeep(int beep) {
-        final MediaPlayer mp_beep;
-        if (beep == LOW_BEEP) {
-            mp_beep = MediaPlayer.create(this, R.raw.beep_low2);
-        }
-        else {
-            mp_beep = MediaPlayer.create(this, R.raw.beep_high2);
-        }
-        mp_beep.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+    private void playBeep(Beep beep) {
+        MediaPlayer mpBeep;
+        if (beep == Beep.BUFFERING) mpBeep = MediaPlayer.create(this, R.raw.beep_low_3x);
+        else if (beep == Beep.NEXT) mpBeep = MediaPlayer.create(this, R.raw.beep_low_high);
+        else if (beep == Beep.PREVIOUS) mpBeep = MediaPlayer.create(this, R.raw.beep_high_low);
+        else mpBeep = MediaPlayer.create(this, R.raw.beep_low);
+
+        mpBeep.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 mediaPlayer.stop();
@@ -618,67 +610,7 @@ public class PlayerService extends Service {
                 }
             }
         });
-        mp_beep.start();
-    }
-
-    private void playBeeps (int beeps) {
-        if (playBeepTimer != null) {
-            playBeepTimer.cancel();
-            playBeepTimer.purge();
-        }
-        playBeepTimer = new Timer();
-        TimerTask beep_tt = null;
-        switch (beeps) {
-            case NEXT_BEEPS:
-                beep_tt = new TimerTask() {
-                    int numberBeeps = 2;
-                    int beepNumber = 0;
-                    @Override
-                    public void run() {
-                        beepNumber++;
-                        if (beepNumber == 1) playBeep(LOW_BEEP);
-                        else playBeep(HIGH_BEEP);
-                        if (beepNumber >= numberBeeps) {
-                            playBeepTimer.cancel();
-                            playBeepTimer.purge();
-                        }
-                    }
-                };
-                break;
-            case PREVIOUS_BEEPS:
-                beep_tt = new TimerTask() {
-                    int numberBeeps = 2;
-                    int beepNumber = 0;
-                    @Override
-                    public void run() {
-                        beepNumber++;
-                        if (beepNumber == 1) playBeep(HIGH_BEEP);
-                        else playBeep(LOW_BEEP);
-                        if (beepNumber >= numberBeeps) {
-                            playBeepTimer.cancel();
-                            playBeepTimer.purge();
-                        }
-                    }
-                };
-                break;
-            case REBUFFERING_BEEPS:
-                beep_tt = new TimerTask() {
-                    int numberBeeps = 3;
-                    int beepNumber = 0;
-                    @Override
-                    public void run() {
-                        beepNumber++;
-                        playBeep(LOW_BEEP);
-                        if (beepNumber >= numberBeeps) {
-                            playBeepTimer.cancel();
-                            playBeepTimer.purge();
-                        }
-                    }
-                };
-                break;
-
-        }
-        playBeepTimer.scheduleAtFixedRate(beep_tt, 0, BEEP_PLAY_SEPARATION_TIME);
+        mpBeep.start();
     }
 
     private void playerStatusChanged(PlayerStatus newStatus) {
@@ -756,8 +688,7 @@ public class PlayerService extends Service {
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                Log.i("Test", "OnCompletition started");
-                playBeeps(REBUFFERING_BEEPS);
+                playBeep(Beep.BUFFERING);
                 playRadio();
             }
         });
@@ -767,8 +698,7 @@ public class PlayerService extends Service {
             public boolean onInfo(MediaPlayer mediaPlayer, int what, int extra) {
                 switch (what) {
                     case MediaPlayer.MEDIA_INFO_BUFFERING_START:
-                        Log.i("Test", "Buffering started");
-                        playBeeps(REBUFFERING_BEEPS);
+                        playBeep(Beep.BUFFERING);
                         playRadio();
                         break;
                 }
