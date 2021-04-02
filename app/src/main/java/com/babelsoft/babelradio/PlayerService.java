@@ -48,9 +48,7 @@ public class PlayerService extends Service {
     private static RadioChannel[] radioChannels;
     private static int currentChannelTableNumber = 0;
     private CountDownTimer reBufferingTimer;
-    private final static int BEEP_PLAY_SEPARATION_TIME = 200;
     private RadioChannel radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem;
-    private Timer playBeepTimer;
     private MediaSession ms;
     private IcyStreamMeta streamMeta = new IcyStreamMeta();
     private String notificationChannelId = "Babel Radio";
@@ -337,7 +335,7 @@ public class PlayerService extends Service {
             updateA2dpDisplayTimer = null;
         }
         if (playerStatus != PlayerStatus.PLAYING) {
-            displayText = radioChannels[currentChannelTableNumber].getChannelName() + " (" + playerStatus.getText() + ")";
+            displayText = channelName + " (" + playerStatus.getText() + ")";
             updateA2dpDisplay(displayText);
         }
         else {
@@ -349,7 +347,7 @@ public class PlayerService extends Service {
                 public void run() {
                     switch (mode[0]) {
                         case "playing":
-                            displayText = radioChannels[currentChannelTableNumber].getChannelName() + " (" + playerStatus.getText() + ")";
+                            displayText = channelName + " (" + playerStatus.getText() + ")";
                             mode[0] = "artist";
                             break;
                         case "artist":
