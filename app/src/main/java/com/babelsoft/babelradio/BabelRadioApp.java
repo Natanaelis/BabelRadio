@@ -108,7 +108,7 @@ public class BabelRadioApp extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action == ControlAction.UPDATE_SCREEN.name()) updateScreen(intent);
+                if (action == ControlAction.UPDATE_SCREEN.name()) updateScreen();
                 else if (action == ControlAction.CLOSE_PLAYER_SERVICE.name()) {
                     String source = intent.getStringExtra("Source");
                     if (source.equals("Notification")) {
@@ -125,14 +125,13 @@ public class BabelRadioApp extends AppCompatActivity {
         registerReceiver(controlReceiver, controlsFilter);
     }
 
-    private void updateScreen(Intent intent) {
+    private void updateScreen() {
         String channelTextNew = PlayerService.channelName;
         String channelTextOld = txtChannel.getText().toString();
         if (channelTextNew != null && !channelTextNew.equals(channelTextOld)) {
             txtChannel.setText(channelTextNew);
         }
-        playerStatusText = PlayerService.playerStatus.getText();
-        txtPlayerStatusTextView.setText(playerStatusText);
+        txtPlayerStatusTextView.setText(PlayerService.playerStatus.getText());
         txtArtistTextView.setText(PlayerService.artistText);
         txtTitleTextView.setText(PlayerService.titleText);
         imgRadioImage.setImageResource(PlayerService.channelImage);
