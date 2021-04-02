@@ -37,8 +37,10 @@ public class PlayerService extends Service {
     private BroadcastReceiver controlReceiver;
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
     private int currentVolume;
-    private static String ARTIST_TEXT;
-    private static String TITLE_TEXT;
+    public static String artistText;
+    public static String titleText;
+    public static String channelName;
+    public static int channelImage;
     private static final int LOW_BEEP = 0;
     private static final int HIGH_BEEP = 1;
     private static final int NEXT_BEEPS = 0;
@@ -89,11 +91,11 @@ public class PlayerService extends Service {
 
         registerChannels();
 
-        playerStatusChanged(PlayerStatus.READY);
-
         resetArtistTitle();
 
-        updateScreen();
+        setChannelNameIcon();
+
+        playerStatusChanged(PlayerStatus.READY);
 
         autoPlay();
     }
@@ -303,11 +305,11 @@ public class PlayerService extends Service {
     }
 
     private void updateNotification(Intent intent) {
-        notificationView.setTextViewText(R.id.channel_name_text, intent.getStringExtra("Channel_Name"));
-        notificationView.setTextViewText(R.id.artist_text, intent.getStringExtra("Artist"));
-        notificationView.setTextViewText(R.id.title_text, intent.getStringExtra("Title"));
-        notificationView.setTextViewText(R.id.status_text, intent.getStringExtra("Player_Status"));
-        notificationView.setImageViewResource(R.id.channel_icon, intent.getIntExtra("Image", 0));
+        notificationView.setTextViewText(R.id.channel_name_text, channelName);
+        notificationView.setTextViewText(R.id.artist_text, artistText);
+        notificationView.setTextViewText(R.id.title_text, titleText);
+        notificationView.setTextViewText(R.id.status_text, playerStatus.getText());
+        notificationView.setImageViewResource(R.id.channel_icon, channelImage);
 
         if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_play);
         else notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_stop);
@@ -357,11 +359,11 @@ public class PlayerService extends Service {
                             mode[0] = "artist";
                             break;
                         case "artist":
-                            displayText = ARTIST_TEXT;
+                            displayText = artistText;
                             mode[0] = "title";
                             break;
                         case "title":
-                            displayText = TITLE_TEXT;
+                            displayText = titleText;
                             mode[0] = "category";
                             break;
                         case "category":
@@ -389,10 +391,10 @@ public class PlayerService extends Service {
             @Override
             public void run() {
                 refreshStreamMeta(radioChannels[currentChannelTableNumber].getChannelURL());
-                ARTIST_TEXT = getStreamArtist();
-                String TITLE_TEXT_NEW = getStreamTitle();
-                if (!TITLE_TEXT_NEW.equals(TITLE_TEXT)) {
-                    TITLE_TEXT = TITLE_TEXT_NEW;
+                artistText = getStreamArtist();
+                String titleTextNew = getStreamTitle();
+                if (!titleTextNew.equals(titleText)) {
+                    titleText = titleTextNew;
                     updateScreen();
                 }
             }
@@ -438,10 +440,6 @@ public class PlayerService extends Service {
     private void updateScreen() {
         Intent updateUpdateScreenIntent = new Intent();
         updateUpdateScreenIntent.setAction(ControlAction.UPDATE_SCREEN.name());
-        updateUpdateScreenIntent.putExtra("Channel_Name", radioChannels[currentChannelTableNumber].getChannelName());
-        updateUpdateScreenIntent.putExtra("Player_Status", playerStatus.getText());
-        updateUpdateScreenIntent.putExtra("Artist", ARTIST_TEXT);
-        updateUpdateScreenIntent.putExtra("Title", TITLE_TEXT);
         updateUpdateScreenIntent.putExtra("Image", radioChannels[currentChannelTableNumber].getChannelImage());
         sendBroadcast(updateUpdateScreenIntent);
     }
@@ -500,6 +498,7 @@ public class PlayerService extends Service {
             if (currentChannelTableNumber < 0 ) {
                 currentChannelTableNumber = radioChannels.length - 1;
             }
+            setChannelNameIcon();
         }
         if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
             playRadio();
@@ -517,6 +516,7 @@ public class PlayerService extends Service {
             if (currentChannelTableNumber > radioChannels.length - 1 ) {
                 currentChannelTableNumber = 0;
             }
+            setChannelNameIcon();
         }
         if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
             playRadio();
@@ -525,6 +525,11 @@ public class PlayerService extends Service {
         }
         resetArtistTitle();
         updateScreen();
+    }
+
+    private void setChannelNameIcon() {
+        channelName = radioChannels[currentChannelTableNumber].getChannelName();
+        channelImage = radioChannels[currentChannelTableNumber].getChannelImage();
     }
 
     private void reBufferingCountDown() {
@@ -705,10 +710,9 @@ public class PlayerService extends Service {
     }
     
     private void resetArtistTitle() {
-        ARTIST_TEXT = "Artist";
-        TITLE_TEXT = "Title";
+        artistText = "Artist";
+        titleText = "Title";
     }
-
 
     @Override
     public void onDestroy() {

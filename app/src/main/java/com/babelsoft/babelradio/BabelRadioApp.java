@@ -126,17 +126,16 @@ public class BabelRadioApp extends AppCompatActivity {
     }
 
     private void updateScreen(Intent intent) {
-        String channelTextNew = intent.getStringExtra("Channel_Name");
+        String channelTextNew = PlayerService.channelName;
         String channelTextOld = txtChannel.getText().toString();
-        if (!channelTextNew.equals(channelTextOld)) {
+        if (channelTextNew != null && !channelTextNew.equals(channelTextOld)) {
             txtChannel.setText(channelTextNew);
         }
         playerStatusText = PlayerService.playerStatus.getText();
         txtPlayerStatusTextView.setText(playerStatusText);
-        txtArtistTextView.setText(intent.getStringExtra("Artist"));
-        txtTitleTextView.setText(intent.getStringExtra("Title"));
-
-        imgRadioImage.setImageResource(intent.getIntExtra("Image", 0));
+        txtArtistTextView.setText(PlayerService.artistText);
+        txtTitleTextView.setText(PlayerService.titleText);
+        imgRadioImage.setImageResource(PlayerService.channelImage);
 
         if (PlayerService.playerStatus == PlayerStatus.READY)
             btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
