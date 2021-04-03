@@ -370,7 +370,7 @@ public class PlayerService extends Service {
                     updateA2dpDisplay(displayText);
                 }
             };
-            updateA2dpDisplayTimer.scheduleAtFixedRate(tt, 0, Integer.valueOf(preferences.getString("A2DP_DISPLAY_UPDATE_TIME", "8000")));
+            updateA2dpDisplayTimer.scheduleAtFixedRate(tt, 0, Integer.valueOf(preferences.getString(Settings.A2DP_DISPLAY_UPDATE_TIME.name(), "8000")));
         }
     }
 
@@ -391,7 +391,7 @@ public class PlayerService extends Service {
                 }
             }
         };
-        downloadMetaDataTimer.scheduleAtFixedRate(mt, 0, Integer.valueOf(preferences.getString("METADATA_REFRESH_TIME", "12000")));
+        downloadMetaDataTimer.scheduleAtFixedRate(mt, 0, Integer.valueOf(preferences.getString(Settings.METADATA_REFRESH_TIME.name(), "12000")));
     }
 
     private void updateA2dpDisplay(final String text) {
@@ -526,7 +526,7 @@ public class PlayerService extends Service {
 
     private void reBufferingCountDown() {
         stopBufferingCountDown();
-        int reBufferingTime = Integer.valueOf(preferences.getString("REBUFFERING_DELAY_TIME", "8000"));
+        int reBufferingTime = Integer.valueOf(preferences.getString(Settings.REBUFFERING_DELAY_TIME.name(), "8000"));
         reBufferingTimer = new CountDownTimer(reBufferingTime, reBufferingTime) {
             public void onTick(long millisUntilFinished) {
             }
@@ -635,8 +635,8 @@ public class PlayerService extends Service {
 
     private void autoPlay() {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (preferences.getBoolean("RUN_SERVICE_AFTER_A2DP_CONNECTED", true) &&
-            preferences.getBoolean("AUTO_PLAY_AFTER_A2DP_CONNECTED", false)) playRadio();
+        if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true) &&
+            preferences.getBoolean(Settings.AUTO_PLAY_AFTER_A2DP_CONNECTED.name(), false)) playRadio();
     }
     
     private void resetArtistTitle() {

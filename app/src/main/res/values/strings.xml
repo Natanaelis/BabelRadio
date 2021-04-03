@@ -1,3 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Babel Radio</string>
+    <string name="setting_1_key">RUN_SERVICE_AFTER_A2DP_CONNECTED</string>
+    <string name="setting_1_title">Launch Player</string>
+    <string name="setting_1_summary">Launch after connecting to bluetooth device</string>
+    <string name="setting_2_key">AUTO_PLAY_AFTER_A2DP_CONNECTED</string>
+    <string name="setting_2_title">Auto Play</string>
+    <string name="setting_2_summary">Play after connecting to bluetooth device</string>
+    <string name="setting_3_key">A2DP_DISPLAY_UPDATE_TIME</string>
+    <string name="setting_3_title">Bluetooth Device Update</string>
+    <string name="setting_3_summary">Define time for bluetooth device screen update</string>
+    <string name="setting_4_key">REBUFFERING_DELAY_TIME</string>
+    <string name="setting_4_title">Re-buffering Time</string>
+    <string name="setting_4_summary">Define time for re-buffer after buffer got empty</string>
+    <string name="setting_5_key">METADATA_REFRESH_TIME</string>
+    <string name="setting_5_title">Metadata Refresh Time</string>
+    <string name="setting_5_summary">Define time for updating metadata from a stream</string>
+    <string name="setting_6_key">CHECK_A2DP_DEVICE_DELAY_TIME</string>
+    <string name="setting_6_title">Bluetooth Delay Time</string>
+    <string name="setting_6_summary">Define time for awaiting for bluetooth device</string>
+    <string-array name="settings_list_preference_titles">
+        <item>5 seconds</item>
+        <item>8 seconds</item>
+        <item>12 seconds</item>
+        <item>15 seconds</item>
+        <item>20 seconds</item>
+        <item>25 seconds</item>
+    </string-array>
+    <string-array name="settings_list_preference_values">
+        <item>5000</item>
+        <item>8000</item>
+        <item>12000</item>
+        <item>15000</item>
+        <item>20000</item>
+        <item>25000</item>
+    </string-array>
 </resources>

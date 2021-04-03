@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BootService extends Service {
-    private final static String TAG = "Test";
+    private final static String TAG = "BootService";
     private static boolean isBluetoothOn = false;
     private static boolean isBluetoothA2dpConnected = false;
     private BroadcastReceiver a2dpReceiver;
@@ -84,19 +84,13 @@ public class BootService extends Service {
                             BluetoothAdapter.ERROR);
                     switch (state) {
                         case BluetoothAdapter.STATE_OFF:
-                            isBluetoothOn = false;
-                            isBluetoothA2dpConnected = false;
-                            break;
                         case BluetoothAdapter.STATE_TURNING_OFF:
+                        case BluetoothAdapter.STATE_TURNING_ON:
                             isBluetoothOn = false;
                             isBluetoothA2dpConnected = false;
                             break;
                         case BluetoothAdapter.STATE_ON:
                             isBluetoothOn = true;
-                            break;
-                        case BluetoothAdapter.STATE_TURNING_ON:
-                            isBluetoothOn = false;
-                            isBluetoothA2dpConnected = false;
                             break;
                     }
                 }
@@ -122,7 +116,7 @@ public class BootService extends Service {
                             Log.i(TAG, "BluetoothA2dp Device Connected: " + a2dpDeviceName);
                             isBluetoothA2dpConnected = true;
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);;
-                            if (preferences.getBoolean("RUN_SERVICE_AFTER_A2DP_CONNECTED", true)) launchPlayerService();
+                            if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true)) launchPlayerService();
                         } else if (state == BluetoothA2dp.STATE_DISCONNECTED) {
                             if (isBluetoothA2dpConnected) {
                                 a2dpDeviceName = device.getName();
@@ -147,7 +141,7 @@ public class BootService extends Service {
         };
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction((BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
-        intentFilter.addAction((BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED));
+//        intentFilter.addAction((BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED));
 
         registerReceiver(a2dpReceiver, intentFilter);
     }
@@ -160,7 +154,7 @@ public class BootService extends Service {
             isBluetoothA2dpConnected = true;
             playConnectionSound();
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);;
-            new CountDownTimer(Integer.valueOf(preferences.getString("CHECK_A2DP_DEVICE_DELAY_TIME", "15000")), 100) {
+            new CountDownTimer(Integer.valueOf(preferences.getString(Settings.CHECK_A2DP_DEVICE_DELAY_TIME.name(), "15000")), 100) {
                 public void onTick(long millisUntilFinished) {
                     if (a2dpIntent != null) {
                         BluetoothDevice device = a2dpIntent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
