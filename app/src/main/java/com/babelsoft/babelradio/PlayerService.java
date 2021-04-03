@@ -35,7 +35,7 @@ public class PlayerService extends Service {
     private AudioManager am;
     private BroadcastReceiver controlReceiver;
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
-    private int currentVolume;
+    private int currentVolume, startupVolume;
     public static String artistText;
     public static String titleText;
     public static String channelName;
@@ -88,6 +88,8 @@ public class PlayerService extends Service {
         setChannelNameIcon();
 
         playerStatusChanged(PlayerStatus.READY);
+
+        rememberStartupVolume();
 
         autoPlay();
     }
@@ -211,7 +213,10 @@ public class PlayerService extends Service {
                     }
                     else if (source.equals("BootService")) {
                         ProcessControl pc = new ProcessControl();
-                        if (pc.isActivityRunning(BabelRadioApp.class, getApplicationContext())) onStopClick();
+                        if (pc.isActivityRunning(BabelRadioApp.class, getApplicationContext())) {
+                            setVolume(startupVolume);
+                            onStopClick();
+                        }
                         else stopSelf();
                     }
                     else if (source.equals("Notification")) {
@@ -244,11 +249,9 @@ public class PlayerService extends Service {
             public void onAudioFocusChange(int focusChange) {
                 switch (focusChange) {
                     case AudioManager.AUDIOFOCUS_GAIN:
-                        resetToCurrentVolume();
-                        playerStatusChanged(playerPreviousStatus);
-                        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
-                            playRadio();
-                        }
+                        setVolume(currentVolume);
+                        if (playerStatus != PlayerStatus.READY) playerStatusChanged(playerPreviousStatus);
+                        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) playRadio();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS:
                         rememberCurrentVolume();
@@ -440,10 +443,12 @@ public class PlayerService extends Service {
         currentVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
     }
 
-    private void resetToCurrentVolume() {
-//        if (am.isBluetoothA2dpOn()) setVolumeMax();
-//        else
-            am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+    private void rememberStartupVolume() {
+        startupVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+    }
+
+    private void setVolume(int volume) {
+            am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
     }
 
     private void setVolumeMax() {
@@ -470,7 +475,7 @@ public class PlayerService extends Service {
     }
 
     private void onStopClick() {
-        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
+        if (playerStatus != PlayerStatus.READY) {
             playBeep(Beep.STOP);
             resetArtistTitle();
             playerStatusChanged(PlayerStatus.READY);
@@ -649,6 +654,7 @@ public class PlayerService extends Service {
         playerStatusChanged(PlayerStatus.READY);
         updateScreen();
         stopPlay();
+        setVolume(startupVolume);
         cancelNotification();
         releaseAudioFocus(this);
         ms.release();

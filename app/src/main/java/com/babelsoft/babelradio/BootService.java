@@ -31,6 +31,7 @@ public class BootService extends Service {
     private Intent a2dpIntent = null;
     private BluetoothAdapter mBluetoothAdapter;
     private String a2dpDeviceName = null;
+    private SharedPreferences preferences;
 
     @Nullable
     @Override
@@ -115,7 +116,7 @@ public class BootService extends Service {
                             a2dpDeviceName = device.getName();
                             Log.i(TAG, "BluetoothA2dp Device Connected: " + a2dpDeviceName);
                             isBluetoothA2dpConnected = true;
-                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ctx);;
+                            preferences = PreferenceManager.getDefaultSharedPreferences(ctx);;
                             if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true)) launchPlayerService();
                         } else if (state == BluetoothA2dp.STATE_DISCONNECTED) {
                             if (isBluetoothA2dpConnected) {
@@ -153,7 +154,7 @@ public class BootService extends Service {
         if (status) {
             isBluetoothA2dpConnected = true;
             playConnectionSound();
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);;
+            preferences = PreferenceManager.getDefaultSharedPreferences(this);
             new CountDownTimer(Integer.valueOf(preferences.getString(Settings.CHECK_A2DP_DEVICE_DELAY_TIME.name(), "15000")), 100) {
                 public void onTick(long millisUntilFinished) {
                     if (a2dpIntent != null) {
@@ -175,6 +176,14 @@ public class BootService extends Service {
     private void launchPlayerService() {
         ProcessControl pc = new ProcessControl();
         if (!pc.isServiceRunning(PlayerService.class, getApplicationContext())) startForegroundService(new Intent(this, PlayerService.class));
+        else {
+            if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true) &&
+                    preferences.getBoolean(Settings.AUTO_PLAY_AFTER_A2DP_CONNECTED.name(), false)) {
+                Intent autoPlayIntent = new Intent();
+                autoPlayIntent.setAction(ControlAction.PLAY.name());
+                sendBroadcast(autoPlayIntent);
+            }
+        };
     }
 
     private void closePlayerService() {
