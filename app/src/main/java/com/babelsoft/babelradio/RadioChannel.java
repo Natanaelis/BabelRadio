@@ -8,28 +8,28 @@ public class RadioChannel {
     private String channelDescription;
     private int channelImage;
 
-    void setChannelNumber(int mChannelNumber) {
-        channelNumber = mChannelNumber;
+    void setChannelNumber(int channelNumber) {
+        this.channelNumber = channelNumber;
     }
 
-    void setChannelName (String mChannelName) {
-        channelName = mChannelName;
+    void setChannelName (String channelName) {
+        this.channelName = channelName;
     }
 
-    void setChannelURL (String mChannelURL) {
-        channelURL = mChannelURL;
+    void setChannelURL (String channelURL) {
+        this.channelURL = channelURL;
     }
 
-    void setChannelBitrate (String mChannelBitrate) {
-        channelBitrate = mChannelBitrate;
+    void setChannelBitrate (String channelBitrate) {
+        this.channelBitrate = channelBitrate;
     }
 
-    void setChannelDescription (String mChannelDescription) {
-        channelDescription = mChannelDescription;
+    void setChannelDescription (String channelDescription) {
+        this.channelDescription = channelDescription;
     }
 
-    void setChannelImage(int mchannelImage) {
-        channelImage = mchannelImage;
+    void setChannelImage(int channelImage) {
+        this.channelImage = channelImage;
     }
 
     int getChannelNumber() {
