@@ -21,24 +21,16 @@ public class BabelRadioApp extends AppCompatActivity {
     private TextView txtArtistTextView;
     private TextView txtTitleTextView;
     private ImageView imgRadioImage;
-    private static ImageButton btnPlayStop;
-    private static ImageButton btnPrevious;
-    private static ImageButton btnNext;
-    private static ImageButton btnSettings;
+    private ImageButton btnPlayStop;
     private BroadcastReceiver controlReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         initializeSharedPreferences();
-
         initializeUI();
-
         initializeServices();
-
         initializeControlReceiver();
-
     }
 
     private void initializeSharedPreferences() {
@@ -46,6 +38,9 @@ public class BabelRadioApp extends AppCompatActivity {
     }
 
     private void initializeUI() {
+        ImageButton btnPrevious;
+        ImageButton btnNext;
+        ImageButton btnSettings;
         setContentView(R.layout.main_layout);
         txtChannel = (TextView) findViewById(R.id.channelTextView);
         txtPlayerStatusTextView = (TextView) findViewById(R.id.txtPlayerStatusTextView);
@@ -53,7 +48,7 @@ public class BabelRadioApp extends AppCompatActivity {
         txtTitleTextView = (TextView) findViewById(R.id.txtTitleTextView);
         imgRadioImage = (ImageView) findViewById(R.id.radioImage);
         imgRadioImage.getLayoutParams().height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200
-                , getResources().getDisplayMetrics());;
+                , getResources().getDisplayMetrics());
 
         btnPlayStop = (ImageButton) findViewById(R.id.playStopButton);
         btnPrevious = (ImageButton) findViewById(R.id.previousButton);
@@ -107,8 +102,8 @@ public class BabelRadioApp extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action == ControlAction.UPDATE_SCREEN.name()) updateScreen();
-                else if (action == ControlAction.CLOSE_PLAYER_SERVICE.name()) {
+                if (action.equals(ControlAction.UPDATE_SCREEN.name())) updateScreen();
+                else if (action.equals(ControlAction.CLOSE_PLAYER_SERVICE.name())) {
                     String source = intent.getStringExtra("Source");
                     if (source.equals("Notification")) {
                         finish();
