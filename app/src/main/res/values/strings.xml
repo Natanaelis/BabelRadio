@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Babel Radio</string>
+    <string name="notification_channel_name">Babel Radio Notification</string>
+    <string name="notification_id">78</string>
     <string name="setting_1_key">RUN_SERVICE_AFTER_A2DP_CONNECTED</string>
     <string name="setting_1_title">Launch Player</string>
     <string name="setting_1_summary">Launch after connecting to bluetooth device</string>

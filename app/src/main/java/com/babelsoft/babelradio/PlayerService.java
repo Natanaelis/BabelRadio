@@ -31,32 +31,30 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class PlayerService extends Service {
-    private MediaPlayer mp = null;
-    private AudioManager am;
-    private BroadcastReceiver controlReceiver;
-    private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
-    private int currentVolume, startupVolume;
     public static String artistText;
     public static String titleText;
     public static String channelName;
     public static int channelImage;
     public static PlayerStatus playerStatus = PlayerStatus.READY;
+    private int currentChannelTableNumber = 0;
+    private int currentVolume, startupVolume;
     private PlayerStatus playerPreviousStatus = PlayerStatus.READY;
-    private String displayText = null;
-    private Timer updateA2dpDisplayTimer;
-    private Timer downloadMetaDataTimer;
-    private static RadioChannel[] radioChannels;
-    private static int currentChannelTableNumber = 0;
-    private CountDownTimer reBufferingTimer;
-    private RadioChannel radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem;
+    private RadioChannel[] radioChannels;
+    private MediaPlayer mp = null;
+    private AudioManager am;
     private MediaSession ms;
-    private IcyStreamMeta streamMeta = new IcyStreamMeta();
-    private String notificationChannelId = "Babel Radio";
-    private String notificationChannelName = "Babel Radio Notification";
-    private final static int NOTIFICATION_ID = 78;
-    private RemoteViews notificationView;
+    private BroadcastReceiver controlReceiver;
     private PendingIntent resultPendingIntent;
     private SharedPreferences preferences;
+    private RemoteViews notificationView;
+    private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener;
+    private String displayText = null;
+    private DisplayMode mode;
+    private Timer updateA2dpDisplayTimer;
+    private Timer downloadMetaDataTimer;
+    private CountDownTimer reBufferingTimer;
+    private RadioChannel radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem; // TODO It will be moved to server
+    private IcyStreamMeta streamMeta = new IcyStreamMeta();
 
     @Nullable
     @Override
@@ -66,66 +64,44 @@ public class PlayerService extends Service {
 
     @Override
     public void onCreate() {
-
         initiateNotification();
-
         showNotification();
-
-//        cancelNotification();
-
         initializeMediaPlayer();
-
         initializeControlReceiver();
-
         initializeAudioChangeFocus();
-
         initializeMediaButtons();
-
         registerChannels();
-
         resetArtistTitle();
-
         setChannelNameIcon();
-
         playerStatusChanged(PlayerStatus.READY);
-
         rememberStartupVolume();
-
         autoPlay();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         return super.onStartCommand(intent,flags,startId);
     }
 
     private void initiateNotification() {
-
         Intent activityIntent = new Intent(this, BabelRadioApp.class);
-
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         int importance = NotificationManager.IMPORTANCE_LOW;
-
-        NotificationChannel mChannel = new NotificationChannel(
-                notificationChannelId, notificationChannelName, importance);
+        NotificationChannel mChannel = new NotificationChannel(getResources().getString(R.string.app_name),
+                getResources().getString(R.string.notification_channel_name), importance);
         notificationManager.createNotificationChannel(mChannel);
 
         resultPendingIntent = PendingIntent.getActivity(this, 0,
                 activityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
         notificationView = new RemoteViews(getPackageName(), R.layout.notification);
 
         setNotificationButtonsListener(notificationView);
-
     }
 
     private void showNotification() {
-
-        Notification.Builder builder = new Notification.Builder(this, notificationChannelId)
-                .setContentTitle("Babel Radio")
-                .setContentText("Notification Text")
+        Notification.Builder builder = new Notification.Builder(this, getResources().getString(R.string.app_name))
+                .setContentTitle(getResources().getString(R.string.app_name))
                 .setSmallIcon(R.mipmap.icons8_radio_tower_noti)
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_SECRET)
@@ -135,8 +111,7 @@ public class PlayerService extends Service {
                 .setOngoing(true);
 
         Notification notification = builder.build();
-
-        startForeground(NOTIFICATION_ID, notification);
+        startForeground(Integer.valueOf(getResources().getString(R.string.notification_id)), notification);
     }
 
     private void initializeMediaPlayer() {
@@ -332,7 +307,6 @@ public class PlayerService extends Service {
     }
 
     private void sendTrackInfoToA2dp() {
-        final String[] mode;
         if (updateA2dpDisplayTimer != null) {
             updateA2dpDisplayTimer.cancel();
             updateA2dpDisplayTimer = null;
@@ -342,32 +316,31 @@ public class PlayerService extends Service {
             updateA2dpDisplay(displayText);
         }
         else {
-            mode = new String[]{"playing"};
-
             updateA2dpDisplayTimer = new Timer();
+            mode = DisplayMode.PLAYING;
             TimerTask tt = new TimerTask() {
                 @Override
                 public void run() {
-                    switch (mode[0]) {
-                        case "playing":
+                    switch (mode) {
+                        case PLAYING:
                             displayText = channelName + " (" + playerStatus.getText() + ")";
-                            mode[0] = "artist";
+                            mode = DisplayMode.ARTIST;
                             break;
-                        case "artist":
+                        case ARTIST:
                             displayText = artistText;
-                            mode[0] = "title";
+                            mode = DisplayMode.TITLE;
                             break;
-                        case "title":
+                        case TITLE:
                             displayText = titleText;
-                            mode[0] = "category";
+                            mode = DisplayMode.CATEGORY;
                             break;
-                        case "category":
+                        case CATEGORY:
                             displayText = "Category: " + radioChannels[currentChannelTableNumber].getChannelDescription();
-                            mode[0] = "bitrate";
+                            mode = DisplayMode.BITRATE;
                             break;
-                        case "bitrate":
+                        case BITRATE:
                             displayText = "Bitrate: " + radioChannels[currentChannelTableNumber].getChannelBitrate();
-                            mode[0] = "playing";
+                            mode = DisplayMode.PLAYING;
                             break;
                     }
                     updateA2dpDisplay(displayText);
@@ -378,7 +351,6 @@ public class PlayerService extends Service {
     }
 
     private void downloadMetaData() {
-
         stopDownloadMetaData();
 
         downloadMetaDataTimer = new Timer();
@@ -394,11 +366,11 @@ public class PlayerService extends Service {
                 }
             }
         };
-        downloadMetaDataTimer.scheduleAtFixedRate(mt, 0, Integer.valueOf(preferences.getString(Settings.METADATA_REFRESH_TIME.name(), "12000")));
+        downloadMetaDataTimer.scheduleAtFixedRate(mt, 0,
+                Integer.valueOf(preferences.getString(Settings.METADATA_REFRESH_TIME.name(),"12000")));
     }
 
     private void updateA2dpDisplay(final String text) {
-
         MediaMetadata metadata = new MediaMetadata.Builder()
                 .putString(MediaMetadata.METADATA_KEY_TITLE, text)
                 .putLong(MediaMetadata.METADATA_KEY_DURATION, -1)
@@ -435,7 +407,6 @@ public class PlayerService extends Service {
     private void updateScreen() {
         Intent updateUpdateScreenIntent = new Intent();
         updateUpdateScreenIntent.setAction(ControlAction.UPDATE_SCREEN.name());
-        updateUpdateScreenIntent.putExtra("Image", radioChannels[currentChannelTableNumber].getChannelImage());
         sendBroadcast(updateUpdateScreenIntent);
     }
 
@@ -535,13 +506,11 @@ public class PlayerService extends Service {
         reBufferingTimer = new CountDownTimer(reBufferingTime, reBufferingTime) {
             public void onTick(long millisUntilFinished) {
             }
-
             public void onFinish() {
                 playBeep(Beep.BUFFERING);
                 playRadio();
             }
         }.start();
-
     }
 
     private void stopDownloadMetaData() {
@@ -558,6 +527,7 @@ public class PlayerService extends Service {
         }
     }
 
+    // TODO To be moved to server
     private void registerChannels() {
         radioZlotePrzeboje = new RadioChannel();
         radioZlotePrzeboje.setChannelNumber(1);
@@ -649,21 +619,7 @@ public class PlayerService extends Service {
         titleText = "Title";
     }
 
-    @Override
-    public void onDestroy() {
-        playerStatusChanged(PlayerStatus.READY);
-        updateScreen();
-        stopPlay();
-        setVolume(startupVolume);
-        cancelNotification();
-        releaseAudioFocus(this);
-        ms.release();
-        unregisterReceiver(controlReceiver);
-        super.onDestroy();
-    }
-
     private void playMusic() {
-
         playerStatusChanged(PlayerStatus.BUFFERING);
         reBufferingCountDown();
 
@@ -699,15 +655,26 @@ public class PlayerService extends Service {
 
         mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
             @Override
-            public boolean onInfo(MediaPlayer mediaPlayer, int what, int extra) {
-                switch (what) {
-                    case MediaPlayer.MEDIA_INFO_BUFFERING_START:
-                        playBeep(Beep.BUFFERING);
-                        playRadio();
-                        break;
+            public boolean onInfo(MediaPlayer mediaPlayer, int info, int extra) {
+                if (info == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+                    playBeep(Beep.BUFFERING);
+                    playRadio();
                 }
                 return false;
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        playerStatusChanged(PlayerStatus.READY);
+        updateScreen();
+        stopPlay();
+        setVolume(startupVolume);
+        cancelNotification();
+        releaseAudioFocus(this);
+        ms.release();
+        unregisterReceiver(controlReceiver);
+        super.onDestroy();
     }
 }
