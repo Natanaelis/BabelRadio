@@ -116,7 +116,7 @@ public class BootService extends Service {
                             a2dpDeviceName = device.getName();
                             Log.i(TAG, "BluetoothA2dp Device Connected: " + a2dpDeviceName);
                             isBluetoothA2dpConnected = true;
-                            preferences = PreferenceManager.getDefaultSharedPreferences(ctx);;
+                            preferences = PreferenceManager.getDefaultSharedPreferences(ctx);
                             if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true)) launchPlayerService();
                         } else if (state == BluetoothA2dp.STATE_DISCONNECTED) {
                             if (isBluetoothA2dpConnected) {
@@ -128,7 +128,8 @@ public class BootService extends Service {
                             }
                         }
                     }
-/*
+                    // TODO To be used on later stage
+                    /*
                     else if (action.equals(BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED)) {
                         int state = intent.getIntExtra(BluetoothA2dp.EXTRA_STATE, BluetoothA2dp.STATE_NOT_PLAYING);
                         if (state == BluetoothA2dp.STATE_PLAYING) {
@@ -136,12 +137,13 @@ public class BootService extends Service {
                         else if (state == BluetoothA2dp.STATE_NOT_PLAYING) {
                         }
                     }
-*/
+                    */
                 }
             }
         };
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction((BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
+        // TODO To be used on later stage
 //        intentFilter.addAction((BluetoothA2dp.ACTION_PLAYING_STATE_CHANGED));
 
         registerReceiver(a2dpReceiver, intentFilter);
@@ -155,7 +157,7 @@ public class BootService extends Service {
             isBluetoothA2dpConnected = true;
             playConnectionSound();
             preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            new CountDownTimer(Integer.valueOf(preferences.getString(Settings.CHECK_A2DP_DEVICE_DELAY_TIME.name(), "15000")), 100) {
+            new CountDownTimer(Integer.parseInt(preferences.getString(Settings.CHECK_A2DP_DEVICE_DELAY_TIME.name(), "15000")), 100) {
                 public void onTick(long millisUntilFinished) {
                     if (a2dpIntent != null) {
                         BluetoothDevice device = a2dpIntent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
@@ -183,7 +185,7 @@ public class BootService extends Service {
                 autoPlayIntent.setAction(ControlAction.PLAY.name());
                 sendBroadcast(autoPlayIntent);
             }
-        };
+        }
     }
 
     private void closePlayerService() {
@@ -193,19 +195,21 @@ public class BootService extends Service {
         sendBroadcast(stopPlayerServiceIntent);
     }
 
+    // TODO To be used on later stage
     private void getListOfPairedBluetoothDevices() {
         BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = ba.getBondedDevices();
 
-        List<String> s = new ArrayList<String>();
+        List<String> s = new ArrayList<>();
         for (BluetoothDevice bt : pairedDevices)
             s.add(bt.getName());
-        Log.i(TAG, "Number of Paired Bluetooth Devices: " + String.valueOf(s.size()));
+        Log.i(TAG, "Number of Paired Bluetooth Devices: " + s.size());
         for (String x : s)
             Log.i(TAG, x);
 //        setListAdapter(new ArrayAdapter<String>(this, R.layout.list, s));
     }
 
+    // TODO To be used on later stage
     private void getListOfConnectedBluetoothDevices() {
         connectedDevicesReceiver = new BroadcastReceiver() {
             @Override
@@ -227,9 +231,7 @@ public class BootService extends Service {
                 }
             }
         };
-
         registerReceiver(connectedDevicesReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
-
     }
 
     private void playConnectionSound() {
