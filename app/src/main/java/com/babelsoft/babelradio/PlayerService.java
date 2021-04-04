@@ -111,7 +111,7 @@ public class PlayerService extends Service {
                 .setOngoing(true);
 
         Notification notification = builder.build();
-        startForeground(Integer.valueOf(getResources().getString(R.string.notification_id)), notification);
+        startForeground(Integer.parseInt(getResources().getString(R.string.notification_id)), notification);
     }
 
     private void initializeMediaPlayer() {
@@ -139,13 +139,11 @@ public class PlayerService extends Service {
                             sendBroadcast(new Intent(ControlAction.STOP.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                        case KeyEvent.KEYCODE_MEDIA_PAUSE:
                             sendBroadcast(new Intent(ControlAction.PAUSE.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PLAY:
                             sendBroadcast(new Intent(ControlAction.PLAY.name()));
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                            sendBroadcast(new Intent(ControlAction.PAUSE.name()));
                             break;
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
                             sendBroadcast(new Intent(ControlAction.NEXT.name()));
@@ -169,37 +167,55 @@ public class PlayerService extends Service {
         controlReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (action == ControlAction.STOP.name()) onStopClick();
-                else if (action == ControlAction.PLAY.name()) onPlayClick();
-                else if (action == ControlAction.PLAY_STOP.name()) {
-                    if (playerStatus == PlayerStatus.READY) onPlayClick();
-                    else onStopClick();
-                }
-                else if (action == ControlAction.PAUSE.name()) onPauseClick();
-                else if (action == ControlAction.NEXT.name()) onNextClick();
-                else if (action == ControlAction.PREVIOUS.name()) onPreviousClick();
-                else if (action == ControlAction.CLOSE_PLAYER_SERVICE.name()) {
-                    String source = intent.getStringExtra("Source");
-                    if (source.equals("BabelRadioApp")) {
-                        if (playerStatus == PlayerStatus.READY) {
-                            stopSelf();
+                ControlAction action = ControlAction.valueOf(intent.getAction());
+                switch (action) {
+                    case STOP:
+                        onStopClick();
+                        break;
+                    case PLAY:
+                        onPlayClick();
+                        break;
+                    case PLAY_STOP:
+                        if (playerStatus == PlayerStatus.READY) onPlayClick();
+                        else onStopClick();
+                        break;
+                    case PAUSE:
+                        onPauseClick();
+                        break;
+                    case NEXT:
+                        onNextClick();
+                        break;
+                    case PREVIOUS:
+                        onPreviousClick();
+                        break;
+                    case CLOSE_PLAYER_SERVICE:
+                        String source = intent.getStringExtra("Source");
+                        switch (source) {
+                            case "BabelRadioApp":
+                                if (playerStatus == PlayerStatus.READY) {
+                                    stopSelf();
+                                }
+                                break;
+                            case "BootService":
+                                ProcessControl pc = new ProcessControl();
+                                if (pc.isActivityRunning(BabelRadioApp.class, getApplicationContext())) {
+                                    setVolume(startupVolume);
+                                    onStopClick();
+                                }
+                                else stopSelf();
+                                break;
+                            case "Notification":
+                                stopSelf();
+                                break;
                         }
-                    }
-                    else if (source.equals("BootService")) {
-                        ProcessControl pc = new ProcessControl();
-                        if (pc.isActivityRunning(BabelRadioApp.class, getApplicationContext())) {
-                            setVolume(startupVolume);
-                            onStopClick();
-                        }
-                        else stopSelf();
-                    }
-                    else if (source.equals("Notification")) {
-                        stopSelf();
-                    }
+                        break;
+                    case UPDATE_SCREEN:
+                        updateNotification(intent);
+                        break;
+                    case REQUEST_UPDATE_SCREEN:
+                        updateScreen();
+                        break;
                 }
-                else if (action == ControlAction.UPDATE_SCREEN.name()) updateNotification(intent);
-                else if (action == ControlAction.REQUEST_UPDATE_SCREEN.name()) updateScreen();
             }
         };
 
@@ -297,8 +313,7 @@ public class PlayerService extends Service {
 
     private boolean requestAudioFocus() {
         int result = am.requestAudioFocus(mOnAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) return true;
-        else return false;
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
     private void releaseAudioFocus(final Context context) {
@@ -346,7 +361,7 @@ public class PlayerService extends Service {
                     updateA2dpDisplay(displayText);
                 }
             };
-            updateA2dpDisplayTimer.scheduleAtFixedRate(tt, 0, Integer.valueOf(preferences.getString(Settings.A2DP_DISPLAY_UPDATE_TIME.name(), "8000")));
+            updateA2dpDisplayTimer.scheduleAtFixedRate(tt, 0, Integer.parseInt(preferences.getString(Settings.A2DP_DISPLAY_UPDATE_TIME.name(), "8000")));
         }
     }
 
@@ -367,7 +382,7 @@ public class PlayerService extends Service {
             }
         };
         downloadMetaDataTimer.scheduleAtFixedRate(mt, 0,
-                Integer.valueOf(preferences.getString(Settings.METADATA_REFRESH_TIME.name(),"12000")));
+                Integer.parseInt(preferences.getString(Settings.METADATA_REFRESH_TIME.name(),"12000")));
     }
 
     private void updateA2dpDisplay(final String text) {
@@ -502,7 +517,7 @@ public class PlayerService extends Service {
 
     private void reBufferingCountDown() {
         stopBufferingCountDown();
-        int reBufferingTime = Integer.valueOf(preferences.getString(Settings.REBUFFERING_DELAY_TIME.name(), "8000"));
+        int reBufferingTime = Integer.parseInt(preferences.getString(Settings.REBUFFERING_DELAY_TIME.name(), "8000"));
         reBufferingTimer = new CountDownTimer(reBufferingTime, reBufferingTime) {
             public void onTick(long millisUntilFinished) {
             }
