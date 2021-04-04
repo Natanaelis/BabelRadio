@@ -17,6 +17,7 @@ public class SettingsActivity extends PreferenceActivity {
         addPreferencesFromResource(R.xml.preferences);
 
         setupActionBar();
+        // TODO To be used in later stage
 //        initiatePreferenceChangeListener();
     }
 
@@ -39,10 +40,11 @@ public class SettingsActivity extends PreferenceActivity {
         return mDelegate;
     }
 
+    // TODO To be used in later stage
     private void initiatePreferenceChangeListener() {
 
-        final CheckBoxPreference checkBoxPreference = (CheckBoxPreference)findPreference("RUN_SERVICE_AFTER_A2DP_CONNECTED");
-        ListPreference listPreference = (ListPreference)findPreference("A2DP_DISPLAY_UPDATE_TIME");
+        final CheckBoxPreference checkBoxPreference = (CheckBoxPreference)findPreference(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name());
+        ListPreference listPreference = (ListPreference)findPreference(Settings.A2DP_DISPLAY_UPDATE_TIME.name());
 
         Preference.OnPreferenceChangeListener changeListener = new Preference.OnPreferenceChangeListener() {
             @Override
@@ -60,9 +62,7 @@ public class SettingsActivity extends PreferenceActivity {
             }
 
         };
-
         checkBoxPreference.setOnPreferenceChangeListener(changeListener);
         listPreference.setOnPreferenceChangeListener(changeListener);
     }
-
 }
