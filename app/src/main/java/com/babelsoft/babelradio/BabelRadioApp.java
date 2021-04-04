@@ -26,7 +26,6 @@ public class BabelRadioApp extends AppCompatActivity {
     private static ImageButton btnNext;
     private static ImageButton btnSettings;
     private BroadcastReceiver controlReceiver;
-    private String playerStatusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
