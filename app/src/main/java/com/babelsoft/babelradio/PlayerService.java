@@ -36,7 +36,7 @@ public class PlayerService extends Service {
     public static String channelName;
     public static int channelImage;
     public static PlayerStatus playerStatus = PlayerStatus.READY;
-    private int currentChannelTableNumber = 0;
+    private int currentChannelTableNumber;
     private int currentVolume, startupVolume;
     private PlayerStatus playerPreviousStatus = PlayerStatus.READY;
     private RadioChannel[] radioChannels;
@@ -64,6 +64,7 @@ public class PlayerService extends Service {
 
     @Override
     public void onCreate() {
+        loadSettings();
         initiateNotification();
         showNotification();
         initializeMediaPlayer();
@@ -481,6 +482,7 @@ public class PlayerService extends Service {
             if (currentChannelTableNumber < 0 ) {
                 currentChannelTableNumber = radioChannels.length - 1;
             }
+            rememberCurrentChannelTableNumber();
             setChannelNameIcon();
         }
         if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
@@ -499,6 +501,7 @@ public class PlayerService extends Service {
             if (currentChannelTableNumber > radioChannels.length - 1 ) {
                 currentChannelTableNumber = 0;
             }
+            rememberCurrentChannelTableNumber();
             setChannelNameIcon();
         }
         if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
@@ -513,6 +516,12 @@ public class PlayerService extends Service {
     private void setChannelNameIcon() {
         channelName = radioChannels[currentChannelTableNumber].getChannelName();
         channelImage = radioChannels[currentChannelTableNumber].getChannelImage();
+    }
+
+    private void rememberCurrentChannelTableNumber() {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(Settings.CURRENT_CHANNEL_TABLE_NUMBER.name(), currentChannelTableNumber);
+        editor.commit();
     }
 
     private void reBufferingCountDown() {
@@ -623,8 +632,12 @@ public class PlayerService extends Service {
         }
     }
 
-    private void autoPlay() {
+    private void loadSettings() {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        currentChannelTableNumber = preferences.getInt(Settings.CURRENT_CHANNEL_TABLE_NUMBER.name(), 0);
+    }
+
+    private void autoPlay() {
         if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true) &&
             preferences.getBoolean(Settings.AUTO_PLAY_AFTER_A2DP_CONNECTED.name(), false)) playRadio();
     }
