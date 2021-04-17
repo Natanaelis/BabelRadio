@@ -298,8 +298,8 @@ public class PlayerService extends Service {
         notificationView.setTextViewText(R.id.status_text, playerStatus.getText());
         notificationView.setImageViewResource(R.id.channel_icon, channelImage);
 
-        if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_play);
-        else notificationView.setImageViewResource(R.id.play_stop_button, R.mipmap.button_stop);
+        if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_play);
+        else notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_stop);
 
         showNotification();
     }

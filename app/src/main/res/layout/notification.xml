@@ -98,7 +98,7 @@
             android:scaleY="0.4"
             android:backgroundTint="@color/colorWhite"
             android:tint="@color/black"
-            android:src="@mipmap/button_forward"/>
+            android:src="@drawable/button_forward"/>
 
         <ImageButton
             android:id="@+id/play_stop_button"
@@ -111,7 +111,7 @@
             android:scaleY="0.4"
             android:backgroundTint="@color/colorWhite"
             android:tint="@color/black"
-            android:src="@mipmap/button_play"/>
+            android:src="@drawable/button_play"/>
 
         <ImageButton
             android:id="@+id/previous_button"
@@ -124,7 +124,7 @@
             android:scaleY="0.4"
             android:tint="@color/black"
             android:backgroundTint="@color/colorWhite"
-            android:src="@mipmap/button_rewind"/>
+            android:src="@drawable/button_rewind"/>
 -->
     </RelativeLayout>
 

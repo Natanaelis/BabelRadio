@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@mipmap/background_5" >
+        android:background="@drawable/background" >
 
         <ImageButton
             android:id="@+id/settingsButton"
@@ -20,7 +20,7 @@
             android:scaleX="0.075"
             android:scaleY="0.075"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@mipmap/settings" />
+            app:srcCompat="@drawable/settings" />
 
         <TextView
             android:id="@+id/channelTextView"
@@ -92,7 +92,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="25dp"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@mipmap/button_play" />
+            app:srcCompat="@drawable/button_play" />
 
         <ImageButton
             android:id="@+id/previousButton"
@@ -101,7 +101,7 @@
             android:layout_alignTop="@+id/playStopButton"
             android:layout_toLeftOf="@+id/playStopButton"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@mipmap/button_rewind" />
+            app:srcCompat="@drawable/button_rewind" />
 
         <ImageButton
             android:id="@+id/nextButton"
@@ -110,7 +110,7 @@
             android:layout_alignTop="@id/playStopButton"
             android:layout_toRightOf="@+id/playStopButton"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@mipmap/button_forward" />
+            app:srcCompat="@drawable/button_forward" />
 
         <ImageView
             android:id="@+id/separation"
@@ -119,7 +119,7 @@
             android:layout_centerHorizontal="true"
             android:layout_above="@+id/playStopButton"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@mipmap/base" />
+            app:srcCompat="@drawable/base" />
 
         <TextView
             android:id="@+id/txtPlayerStatusTextView"
