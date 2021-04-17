@@ -131,8 +131,8 @@ public class BabelRadioApp extends AppCompatActivity {
         imgRadioImage.setImageResource(PlayerService.channelImage);
 
         if (PlayerService.playerStatus == PlayerStatus.READY)
-            btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_play));
-        else btnPlayStop.setImageDrawable(getResources().getDrawable(R.mipmap.button_stop));
+            btnPlayStop.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
+        else btnPlayStop.setImageDrawable(getResources().getDrawable(R.drawable.button_stop));
     }
 
     private void stopPlayerService() {
