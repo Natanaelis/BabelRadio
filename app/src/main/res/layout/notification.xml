@@ -125,7 +125,7 @@
             android:tint="@color/black"
             android:backgroundTint="@color/colorWhite"
             android:src="@drawable/button_rewind"/>
--->
+
     </RelativeLayout>
 
 </RelativeLayout>

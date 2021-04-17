@@ -1,7 +1,8 @@
 package com.babelsoft.babelradio;
 
-import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -13,27 +14,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RadiosActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
-//    String radiosUrl = "https://babelradio.000webhostapp.com/countries.php";
+public class RadiosListActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
+    //    String radiosUrl = "https://babelradio.000webhostapp.com/countries.php";
     ListView listView;
     SearchView searchView;
-//    ArrayList<String> radios = new ArrayList<>();
+    //    ArrayList<String> radios = new ArrayList<>();
     static ArrayList<String> listInput = new ArrayList<>();
     ArrayList<String> tags = new ArrayList<>();
 
 
-//    Integer[] imgid = {R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide,
+    //    Integer[] imgid = {R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide,
 //            R.drawable.worldwide};
     Integer imgid = R.drawable.worldwide;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        JSONArray radiosArray;
-        String response = CountriesActivity.databaseResponse;
+        JSONArray radiosArray = null;
+        listInput.clear();
+
+        String response = CountriesListActivity.databaseResponse;
         try {
             radiosArray = new JSONArray(response);
-            for(int i = 0; i < radiosArray.length(); i++) {
+            for (int i = 0; i < radiosArray.length(); i++) {
                 listInput.add(radiosArray.getJSONObject(i).getString("radio_name"));
                 tags.add(radiosArray.getJSONObject(i).getString("radio_tag"));
             }
@@ -48,10 +51,11 @@ public class RadiosActivity extends AppCompatActivity implements IHttpPostAsyncR
 
     private void initiateView() {
         setContentView(R.layout.list_view);
+        setupActionBar();
 
         final ListsAdapter adapter = new ListsAdapter(this, listInput, tags, imgid);
-        listView = (ListView)findViewById(R.id.list);
-        searchView = (SearchView)findViewById(R.id.search);
+        listView = (ListView) findViewById(R.id.list);
+        searchView = (SearchView) findViewById(R.id.search);
 
         listView.setAdapter(adapter);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -66,9 +70,6 @@ public class RadiosActivity extends AppCompatActivity implements IHttpPostAsyncR
                 return false;
             }
         });
-
-        getWindow().getDecorView().setBackgroundColor(Color.DKGRAY);
-
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -92,4 +93,24 @@ public class RadiosActivity extends AppCompatActivity implements IHttpPostAsyncR
     public void postResult(String asyncResult) {
 
     }
+
+    private void setupActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("Radios");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+   }
 }

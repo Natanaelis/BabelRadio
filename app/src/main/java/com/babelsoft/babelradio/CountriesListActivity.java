@@ -1,8 +1,9 @@
 package com.babelsoft.babelradio;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -14,11 +15,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CountriesActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
+public class CountriesListActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
     String inputUrl = "https://babelradio.000webhostapp.com/radios.php";
     ListView list;
     SearchView searchView;
-//    static ArrayList<String> countries = new ArrayList<>();
+    //    static ArrayList<String> countries = new ArrayList<>();
     static ArrayList<String> listInput = new ArrayList<>();
     static String databaseResponse;
 
@@ -37,11 +38,13 @@ public class CountriesActivity extends AppCompatActivity implements IHttpPostAsy
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        JSONArray countriesArray;
-        String response = ContinentsActivity.databaseResponse;
+        JSONArray countriesArray = null;
+        listInput.clear();
+
+        String response = ContinentsListActivity.databaseResponse;
         try {
             countriesArray = new JSONArray(response);
-            for(int i = 0; i < countriesArray.length(); i++) {
+            for (int i = 0; i < countriesArray.length(); i++) {
                 listInput.add(countriesArray.getJSONObject(i).getString("country_name"));
             }
             initiateView();
@@ -54,10 +57,11 @@ public class CountriesActivity extends AppCompatActivity implements IHttpPostAsy
 
     private void initiateView() {
         setContentView(R.layout.list_view);
+        setupActionBar();
 
         final ListsAdapter adapter = new ListsAdapter(this, listInput, imgid);
-        list = (ListView)findViewById(R.id.list);
-        searchView = (SearchView)findViewById(R.id.search);
+        list = (ListView) findViewById(R.id.list);
+        searchView = (SearchView) findViewById(R.id.search);
 
         list.setAdapter(adapter);
 
@@ -69,18 +73,16 @@ public class CountriesActivity extends AppCompatActivity implements IHttpPostAsy
 
             @Override
             public boolean onQueryTextChange(String newText) {
-//                adapter.getFilter().filter(newText);
                 adapter.filter(newText);
                 return false;
             }
         });
 
-        getWindow().getDecorView().setBackgroundColor(Color.DKGRAY);
-
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                list.setEnabled(false);
                 getInput(listInput.get(position));
             }
         });
@@ -96,8 +98,30 @@ public class CountriesActivity extends AppCompatActivity implements IHttpPostAsy
 
     @Override
     public void postResult(String asyncResult) {
-        Intent myIntent = new Intent(CountriesActivity.this, RadiosActivity.class);
+        Intent myIntent = new Intent(CountriesListActivity.this, RadiosListActivity.class);
         databaseResponse = asyncResult;
-        CountriesActivity.this.startActivity(myIntent);
+        startActivity(myIntent);
+        list.setEnabled(true);
+    }
+
+    private void setupActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("Countries");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
     }
 }

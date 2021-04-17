@@ -14,15 +14,22 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BabelRadioApp extends AppCompatActivity {
+public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncResponse {
     private TextView txtChannel;
     private TextView txtPlayerStatusTextView;
     private TextView txtArtistTextView;
     private TextView txtTitleTextView;
     private ImageView imgRadioImage;
     private ImageButton btnPlayStop;
+    private ImageButton btnFindRadio;
     private BroadcastReceiver controlReceiver;
+    private String inputUrl = "https://babelradio.000webhostapp.com/continents.php";
+    public static String databaseResponse;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +61,7 @@ public class BabelRadioApp extends AppCompatActivity {
         btnPrevious = (ImageButton) findViewById(R.id.previousButton);
         btnNext = (ImageButton) findViewById(R.id.nextButton);
         btnSettings = (ImageButton) findViewById(R.id.settingsButton);
+        btnFindRadio = (ImageButton) findViewById(R.id.findRadioButton);
 
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,6 +88,13 @@ public class BabelRadioApp extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(BabelRadioApp.this, SettingsActivity.class));
+            }
+        });
+
+        btnFindRadio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                findRadios();
             }
         });
 
@@ -142,6 +157,23 @@ public class BabelRadioApp extends AppCompatActivity {
         sendBroadcast(stopPlayerServiceIntent);
     }
 
+    private void findRadios() {
+        btnFindRadio.setEnabled(false);
+        Map<String, String> postData = new HashMap<>();
+        postData.put("continent", "continent");
+        HttpPostAsync httpPost = new HttpPostAsync(postData);
+        httpPost.delegate = this;
+        httpPost.execute(inputUrl);
+    }
+
+    @Override
+    public void postResult(String asyncResult) {
+        Intent myIntent = new Intent(BabelRadioApp.this, ContinentsListActivity.class);
+        databaseResponse = asyncResult;
+        startActivity(myIntent);
+        btnFindRadio.setEnabled(true);
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -159,4 +191,5 @@ public class BabelRadioApp extends AppCompatActivity {
         stopPlayerService();
         super.onDestroy();
     }
+
 }
