@@ -31,13 +31,13 @@ public class Metadata {
     }
 
     private void split(String input) {
-        input = input.trim();
+//        input = input;
         String[] inputTable = input.split("-", -1);
         int separatorsCount = inputTable.length - 1;
-        title = inputTable[separatorsCount];
+        title = inputTable[separatorsCount].trim();
         for (int i = 0; i <= separatorsCount - 1; i++) {
             if (i != 0) artist += "-";
-            artist += inputTable[i];
+            artist += inputTable[i].trim();
         }
     }
 

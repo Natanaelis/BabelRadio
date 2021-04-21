@@ -1,5 +1,7 @@
 package com.babelsoft.babelradio;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -49,7 +51,11 @@ public class IcyStreamMeta {
         if (!data.containsKey("StreamTitle"))
             return "";
 
-        return data.get("StreamTitle");
+        // Convert to UTF-8 String
+        byte[] metadataBytes = data.get("StreamTitle").getBytes("ISO-8859-1");
+        String metadataUtf8 = new String(metadataBytes, "UTF-8").replace("'", "");
+
+        return metadataUtf8;
     }
 
     /**
@@ -94,7 +100,7 @@ public class IcyStreamMeta {
         if (headers.containsKey("icy-metaint")) {
             // Headers are sent via HTTP
             metaDataOffset = Integer.parseInt(headers.get("icy-metaint").get(0));
-        } else {
+        }/* else {
             // Headers are sent within a stream
             StringBuilder strHeaders = new StringBuilder();
             char c;
@@ -113,7 +119,7 @@ public class IcyStreamMeta {
                 metaDataOffset = Integer.parseInt(m.group(2));
             }
         }
-
+*/
         // In case no data was sent
         if (metaDataOffset == 0) {
             isError = true;

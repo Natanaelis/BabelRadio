@@ -492,6 +492,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         updateScreenStatus();
         updateScreenArtistTitle();
         updateNotificationStatus();
+        updateNotificationArtistTitle();
     }
 
     private void onNextClick() {
@@ -513,6 +514,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         updateScreenStatus();
         updateScreenArtistTitle();
         updateNotificationStatus();
+        updateNotificationArtistTitle();
     }
 
     private void setChannelNameIcon() {

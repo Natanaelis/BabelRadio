@@ -21,7 +21,10 @@ public class MetadataTask extends AsyncTask<URL, Void, String>
         {
             streamMeta.setStreamUrl(urls[0]);
             streamMeta.refreshMeta();
-            result = streamMeta.getStreamTitle();
+            if (!streamMeta.isError())
+                result = streamMeta.getStreamTitle();
+            else
+                result = "";
         }
         catch (IOException e)
         {
