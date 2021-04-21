@@ -8,14 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class ListsAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
-    private final ArrayList<String> listInput;
+//    private final ArrayList<String> listInput;
     private final ArrayList<String> subtitle;
 //    private final Integer[] imgid;
     private final Integer imgid;
@@ -29,7 +28,7 @@ public class ListsAdapter extends ArrayAdapter<String> {
     public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> subtitle, Integer imgid) {
         super(context, R.layout.list, listInput);
         this.context = context;
-        this.listInput = listInput;
+//        this.listInput = listInput;
         this.subtitle = subtitle;
         this.imgid = imgid;
 
@@ -57,7 +56,7 @@ public class ListsAdapter extends ArrayAdapter<String> {
             subtitleText.setText(subtitle.get(position));
         }
         titleText.setLayoutParams(params);
-        titleText.setText(listInput.get(position));
+        titleText.setText(listAfterFilter.get(position));
         imageView.setImageResource(imgid);
 
         return rowView;

@@ -117,7 +117,8 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if (action.equals(ControlAction.UPDATE_SCREEN.name())) updateScreen();
+                if (action.equals(ControlAction.UPDATE_SCREEN_STATUS.name())) updateScreenStatus();
+                else if (action.equals(ControlAction.UPDATE_SCREEN_ARTIST_TITLE.name())) updateScreenArtistTitle();
                 else if (action.equals(ControlAction.CLOSE_PLAYER_SERVICE.name())) {
                     String source = intent.getStringExtra("Source");
                     if (source.equals("Notification")) {
@@ -128,21 +129,25 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
         };
 
         IntentFilter controlsFilter = new IntentFilter();
-        controlsFilter.addAction(ControlAction.UPDATE_SCREEN.name());
+        controlsFilter.addAction(ControlAction.UPDATE_SCREEN_STATUS.name());
+        controlsFilter.addAction(ControlAction.UPDATE_SCREEN_ARTIST_TITLE.name());
         controlsFilter.addAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
 
         registerReceiver(controlReceiver, controlsFilter);
     }
 
-    private void updateScreen() {
+    private void updateScreenArtistTitle() {
+        txtArtistTextView.setText(PlayerService.artistText);
+        txtTitleTextView.setText(PlayerService.titleText);
+    }
+
+    private void updateScreenStatus() {
         String channelTextNew = PlayerService.channelName;
         String channelTextOld = txtChannel.getText().toString();
         if (channelTextNew != null && !channelTextNew.equals(channelTextOld)) {
             txtChannel.setText(channelTextNew);
         }
         txtPlayerStatusTextView.setText(PlayerService.playerStatus.getText());
-        txtArtistTextView.setText(PlayerService.artistText);
-        txtTitleTextView.setText(PlayerService.titleText);
         imgRadioImage.setImageResource(PlayerService.channelImage);
 
         if (PlayerService.playerStatus == PlayerStatus.READY)
@@ -182,7 +187,7 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     @Override
     protected void onResume() {
         super.onResume();
-        sendBroadcast(new Intent(ControlAction.REQUEST_UPDATE_SCREEN.name()));
+        sendBroadcast(new Intent(ControlAction.REQUEST_SCREEN_UPDATE.name()));
     }
 
     @Override

@@ -117,4 +117,26 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(listInput != null) {
+            listInput.clear();
+        }
+        finish();
+        Runtime.getRuntime().gc();
+    }
+
+/*
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(listInput != null) {
+            listInput.clear();
+            listInput = null;
+        }
+//        Runtime.getRuntime().gc();
+    }
+*/
 }

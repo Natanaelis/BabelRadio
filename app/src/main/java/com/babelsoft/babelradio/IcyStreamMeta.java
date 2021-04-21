@@ -1,7 +1,5 @@
 package com.babelsoft.babelradio;
 
-import android.util.Log;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -17,11 +15,26 @@ public class IcyStreamMeta {
     private Map<String, String> metadata;
     private boolean isError;
     private Map<String, String> data;
-    private String artist;
-    private String title;
 
     public IcyStreamMeta() {
         isError = false;
+    }
+
+    /**
+     * Get artist using stream's title
+     *
+     * @return String
+     * @throws IOException
+     */
+    public String getArtist() throws IOException {
+        data = getMetadata();
+
+        if (!data.containsKey("StreamTitle"))
+            return "";
+
+        String streamTitle = data.get("StreamTitle");
+        String title = streamTitle.substring(0, streamTitle.indexOf("-"));
+        return title.trim();
     }
 
     /**
@@ -30,38 +43,30 @@ public class IcyStreamMeta {
      * @return String
      * @throws IOException
      */
-    public void sortData() throws IOException {
+    public String getStreamTitle() throws IOException {
         data = getMetadata();
 
-        if (data.containsKey("StreamTitle")) {
-            String streamTitle = data.get("StreamTitle");
-            if (streamTitle.contains(" / ")) {
-                streamTitle = streamTitle.replace(" / ", " - ");
-            }
-            if (streamTitle.contains(" - ")) {
-//                int count = streamTitle.length() - streamTitle.replace("-", "").length();
-                artist = streamTitle.substring(0, streamTitle.indexOf("-")).trim();
-                title = streamTitle.substring(streamTitle.indexOf("-")+1).trim();
-            }
-            else {
-                artist = streamTitle;
-                title = streamTitle;
-            }
-        }
-        else {
-            artist = "";
-            title = "";
-        }
+        if (!data.containsKey("StreamTitle"))
+            return "";
+
+        return data.get("StreamTitle");
     }
 
-    public String getArtist() {
-        if (artist.equals("")) artist = "Artist";
-        return artist;
-    }
+    /**
+     * Get title using stream's title
+     *
+     * @return String
+     * @throws IOException
+     */
+    public String getTitle() throws IOException {
+        data = getMetadata();
 
-    public String getTitle() {
-        if (title.equals("")) title = "Title";
-        return title;
+        if (!data.containsKey("StreamTitle"))
+            return "";
+
+        String streamTitle = data.get("StreamTitle");
+        String artist = streamTitle.substring(streamTitle.indexOf("-") + 1);
+        return artist.trim();
     }
 
     public Map<String, String> getMetadata() throws IOException {
@@ -118,7 +123,7 @@ public class IcyStreamMeta {
         // Read metadata
         int b;
         int count = 0;
-        int metaDataLength = 0; // 4080 is the max length
+        int metaDataLength = 4080; // 4080 is the max length
         boolean inData = false;
         StringBuilder metaData = new StringBuilder();
         // Stream position should be either at the beginning or right after headers

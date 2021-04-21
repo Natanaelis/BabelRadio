@@ -19,7 +19,6 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
     String inputUrl = "https://babelradio.000webhostapp.com/radios.php";
     ListView list;
     SearchView searchView;
-    //    static ArrayList<String> countries = new ArrayList<>();
     static ArrayList<String> listInput = new ArrayList<>();
     static String databaseResponse;
 
@@ -122,6 +121,28 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(listInput != null) {
+            listInput.clear();
+        }
+        finish();
+        Runtime.getRuntime().gc();
+    }
+
+/*
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(listInput != null) {
+            listInput.clear();
+            listInput = null;
+        }
+//        Runtime.getRuntime().gc();
+    }
+*/
+
 }

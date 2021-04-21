@@ -2,6 +2,7 @@ package com.babelsoft.babelradio;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,13 +16,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RadiosListActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
-    //    String radiosUrl = "https://babelradio.000webhostapp.com/countries.php";
     ListView listView;
     SearchView searchView;
-    //    ArrayList<String> radios = new ArrayList<>();
     static ArrayList<String> listInput = new ArrayList<>();
     ArrayList<String> tags = new ArrayList<>();
-
+    JSONArray radiosArray;
 
     //    Integer[] imgid = {R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide,
 //            R.drawable.worldwide};
@@ -30,7 +29,7 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        JSONArray radiosArray = null;
+        radiosArray = null;
         listInput.clear();
 
         String response = CountriesListActivity.databaseResponse;
@@ -75,7 +74,20 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                getRadios(listInput.get(position));
+                try {
+                    RadioChannel newRadio = new RadioChannel();
+                    newRadio.setChannelNumber(PlayerService.radioChannels.size() + 1);
+                    newRadio.setChannelName(radiosArray.getJSONObject(position).getString("radio_name"));
+                    newRadio.setChannelURL(radiosArray.getJSONObject(position).getString("radio_stream"));
+                    newRadio.setChannelBitrate("128kb/s");
+                    newRadio.setChannelDescription(radiosArray.getJSONObject(position).getString("radio_tag"));
+                    newRadio.setChannelImage(R.drawable.logo_rmf);
+                    PlayerService.radioChannels.add(newRadio);
+                    Log.d("Test", "New radio added");
+
+                } catch (JSONException e) {
+                    e.getStackTrace();
+                }
             }
         });
     }
@@ -113,4 +125,26 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
                 return super.onOptionsItemSelected(item);
         }
    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(listInput != null) {
+            listInput.clear();
+        }
+        finish();
+        Runtime.getRuntime().gc();
+    }
+
+/*
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(listInput != null) {
+            listInput.clear();
+            listInput = null;
+        }
+//        Runtime.getRuntime().gc();
+    }
+*/
 }

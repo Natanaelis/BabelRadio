@@ -23,14 +23,19 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RemoteViews;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class PlayerService extends Service {
+//import wseemann.media.FFmpegMediaMetadataRetriever;
+
+public class PlayerService extends Service implements IMetadataAsyncResponse{
     public static String artistText;
     public static String titleText;
     public static String channelName;
@@ -39,7 +44,7 @@ public class PlayerService extends Service {
     private int currentChannelTableNumber;
     private int currentVolume, startupVolume;
     private PlayerStatus playerPreviousStatus = PlayerStatus.READY;
-    private RadioChannel[] radioChannels;
+    public static ArrayList<RadioChannel> radioChannels = new ArrayList<RadioChannel>();
     private MediaPlayer mp = null;
     private AudioManager am;
     private MediaSession ms;
@@ -54,7 +59,8 @@ public class PlayerService extends Service {
     private Timer downloadMetaDataTimer;
     private CountDownTimer reBufferingTimer;
     private RadioChannel radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem; // TODO It will be moved to server
-    private IcyStreamMeta streamMeta = new IcyStreamMeta();
+    private Notification.Builder builder;
+    private final int notificationId = 78;
 
     @Nullable
     @Override
@@ -89,7 +95,7 @@ public class PlayerService extends Service {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         int importance = NotificationManager.IMPORTANCE_LOW;
-        NotificationChannel mChannel = new NotificationChannel(getResources().getString(R.string.app_name),
+        NotificationChannel mChannel = new NotificationChannel(getString(R.string.app_name),
                 getResources().getString(R.string.notification_channel_name), importance);
         notificationManager.createNotificationChannel(mChannel);
 
@@ -101,8 +107,8 @@ public class PlayerService extends Service {
     }
 
     private void showNotification() {
-        Notification.Builder builder = new Notification.Builder(this, getResources().getString(R.string.app_name))
-                .setContentTitle(getResources().getString(R.string.app_name))
+        builder = new Notification.Builder(this, getString(R.string.app_name))
+                .setContentTitle(getString(R.string.app_name))
                 .setSmallIcon(R.mipmap.icons8_radio_tower_noti)
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_SECRET)
@@ -111,8 +117,7 @@ public class PlayerService extends Service {
                 .setAutoCancel(false)
                 .setOngoing(true);
 
-        Notification notification = builder.build();
-        startForeground(Integer.parseInt(getResources().getString(R.string.notification_id)), notification);
+        startForeground(notificationId, builder.build());
     }
 
     private void initializeMediaPlayer() {
@@ -210,11 +215,9 @@ public class PlayerService extends Service {
                                 break;
                         }
                         break;
-                    case UPDATE_SCREEN:
-                        updateNotification(intent);
-                        break;
-                    case REQUEST_UPDATE_SCREEN:
-                        updateScreen();
+                    case REQUEST_SCREEN_UPDATE:
+                        updateScreenStatus();
+                        updateScreenArtistTitle();
                         break;
                 }
             }
@@ -228,8 +231,7 @@ public class PlayerService extends Service {
         controlsFilter.addAction(ControlAction.NEXT.name());
         controlsFilter.addAction(ControlAction.PREVIOUS.name());
         controlsFilter.addAction(ControlAction.CLOSE_PLAYER_SERVICE.name());
-        controlsFilter.addAction(ControlAction.UPDATE_SCREEN.name());
-        controlsFilter.addAction(ControlAction.REQUEST_UPDATE_SCREEN.name());
+        controlsFilter.addAction(ControlAction.REQUEST_SCREEN_UPDATE.name());
 
         registerReceiver(controlReceiver, controlsFilter);
     }
@@ -291,17 +293,24 @@ public class PlayerService extends Service {
         stopForeground(true);
     }
 
-    private void updateNotification(Intent intent) {
-        notificationView.setTextViewText(R.id.channel_name_text, channelName);
+    public void updateNotificationArtistTitle() {
         notificationView.setTextViewText(R.id.artist_text, artistText);
         notificationView.setTextViewText(R.id.title_text, titleText);
+
+        builder.setCustomContentView(notificationView);
+        startForeground(notificationId, builder.build());
+    }
+
+    private void updateNotificationStatus() {
+        notificationView.setTextViewText(R.id.channel_name_text, channelName);
         notificationView.setTextViewText(R.id.status_text, playerStatus.getText());
         notificationView.setImageViewResource(R.id.channel_icon, channelImage);
 
         if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_play);
         else notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_stop);
 
-        showNotification();
+        builder.setCustomContentView(notificationView);
+        startForeground(notificationId, builder.build());
     }
 
     private void playDummyAudio() {
@@ -351,11 +360,11 @@ public class PlayerService extends Service {
                             mode = DisplayMode.CATEGORY;
                             break;
                         case CATEGORY:
-                            displayText = "Category: " + radioChannels[currentChannelTableNumber].getChannelDescription();
+                            displayText = "Category: " + radioChannels.get(currentChannelTableNumber).getChannelDescription();
                             mode = DisplayMode.BITRATE;
                             break;
                         case BITRATE:
-                            displayText = "Bitrate: " + radioChannels[currentChannelTableNumber].getChannelBitrate();
+                            displayText = "Bitrate: " + radioChannels.get(currentChannelTableNumber).getChannelBitrate();
                             mode = DisplayMode.PLAYING;
                             break;
                     }
@@ -373,12 +382,12 @@ public class PlayerService extends Service {
         TimerTask mt = new TimerTask() {
             @Override
             public void run() {
-                refreshStreamMeta(radioChannels[currentChannelTableNumber].getChannelURL());
-                artistText = getStreamArtist();
-                String titleTextNew = getStreamTitle();
-                if (!titleTextNew.equals(titleText)) {
-                    titleText = titleTextNew;
-                    updateScreen();
+                MetadataTask mt = new MetadataTask();
+                mt.delegate = PlayerService.this;
+                try {
+                    mt.execute(new URL(radioChannels.get(currentChannelTableNumber).getChannelURL()));
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -402,28 +411,17 @@ public class PlayerService extends Service {
                 ms.setPlaybackState(state);
     }
 
-    private void refreshStreamMeta(String streamUrl) {
-        try {
-            streamMeta.setStreamUrl(new URL(streamUrl));
-            streamMeta.refreshMeta();
-            streamMeta.sortData();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    //TODO COMBINE updateStatuses
+    private void updateScreenStatus() {
+        Intent updateUpdateScreenStatusIntent = new Intent();
+        updateUpdateScreenStatusIntent.setAction(ControlAction.UPDATE_SCREEN_STATUS.name());
+        sendBroadcast(updateUpdateScreenStatusIntent);
     }
 
-    private String getStreamArtist() {
-        return streamMeta.getArtist();
-    }
-
-    private String getStreamTitle() {
-        return streamMeta.getTitle();
-    }
-
-    private void updateScreen() {
-        Intent updateUpdateScreenIntent = new Intent();
-        updateUpdateScreenIntent.setAction(ControlAction.UPDATE_SCREEN.name());
-        sendBroadcast(updateUpdateScreenIntent);
+    private void updateScreenArtistTitle() {
+        Intent updateUpdateScreenArtistTitleIntent = new Intent();
+        updateUpdateScreenArtistTitleIntent.setAction(ControlAction.UPDATE_SCREEN_ARTIST_TITLE.name());
+        sendBroadcast(updateUpdateScreenArtistTitleIntent);
     }
 
     private void rememberCurrentVolume() {
@@ -480,7 +478,7 @@ public class PlayerService extends Service {
         if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
             currentChannelTableNumber--;
             if (currentChannelTableNumber < 0 ) {
-                currentChannelTableNumber = radioChannels.length - 1;
+                currentChannelTableNumber = radioChannels.size() - 1;
             }
             rememberCurrentChannelTableNumber();
             setChannelNameIcon();
@@ -491,14 +489,16 @@ public class PlayerService extends Service {
             playerStatusChanged(PlayerStatus.READY);
         }
         resetArtistTitle();
-        updateScreen();
+        updateScreenStatus();
+        updateScreenArtistTitle();
+        updateNotificationStatus();
     }
 
     private void onNextClick() {
         playBeep(Beep.NEXT);
         if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
             currentChannelTableNumber++;
-            if (currentChannelTableNumber > radioChannels.length - 1 ) {
+            if (currentChannelTableNumber > radioChannels.size() - 1 ) {
                 currentChannelTableNumber = 0;
             }
             rememberCurrentChannelTableNumber();
@@ -510,12 +510,14 @@ public class PlayerService extends Service {
             playerStatusChanged(PlayerStatus.READY);
         }
         resetArtistTitle();
-        updateScreen();
+        updateScreenStatus();
+        updateScreenArtistTitle();
+        updateNotificationStatus();
     }
 
     private void setChannelNameIcon() {
-        channelName = radioChannels[currentChannelTableNumber].getChannelName();
-        channelImage = radioChannels[currentChannelTableNumber].getChannelImage();
+        channelName = radioChannels.get(currentChannelTableNumber).getChannelName();
+        channelImage = radioChannels.get(currentChannelTableNumber).getChannelImage();
     }
 
     private void rememberCurrentChannelTableNumber() {
@@ -588,7 +590,12 @@ public class PlayerService extends Service {
         p7klem.setChannelBitrate("128kb/s");
         p7klem.setChannelDescription("Oldies");
         p7klem.setChannelImage(R.drawable.logo_p7_klem);
-        radioChannels = new RadioChannel[]{radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem};
+//        radioChannels = new RadioChannel[]{radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem};
+        radioChannels.add(radioZlotePrzeboje);
+        radioChannels.add(radioZET);
+        radioChannels.add(rmfFM);
+        radioChannels.add(smoothJazz);
+        radioChannels.add(p7klem);
     }
 
     private void playBeep(Beep beep) {
@@ -615,7 +622,8 @@ public class PlayerService extends Service {
             playerPreviousStatus = playerStatus;
             playerStatus = newStatus;
 
-            updateScreen();
+            updateScreenStatus();
+            updateNotificationStatus();
             if (am.isBluetoothA2dpOn()) sendTrackInfoToA2dp();
         }
     }
@@ -634,7 +642,8 @@ public class PlayerService extends Service {
 
     private void loadSettings() {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        currentChannelTableNumber = preferences.getInt(Settings.CURRENT_CHANNEL_TABLE_NUMBER.name(), 0);
+//        currentChannelTableNumber = preferences.getInt(Settings.CURRENT_CHANNEL_TABLE_NUMBER.name(), 0);
+        currentChannelTableNumber = 0;
     }
 
     private void autoPlay() {
@@ -654,7 +663,7 @@ public class PlayerService extends Service {
         try {
             mp = new MediaPlayer();
             mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            mp.setDataSource(radioChannels[currentChannelTableNumber].getChannelURL());
+            mp.setDataSource(radioChannels.get(currentChannelTableNumber).getChannelURL());
             mp.prepareAsync();
 
         } catch (IOException e) {
@@ -696,7 +705,8 @@ public class PlayerService extends Service {
     @Override
     public void onDestroy() {
         playerStatusChanged(PlayerStatus.READY);
-        updateScreen();
+        updateScreenStatus();
+        updateNotificationStatus();
         stopPlay();
         setVolume(startupVolume);
         cancelNotification();
@@ -704,5 +714,16 @@ public class PlayerService extends Service {
         ms.release();
         unregisterReceiver(controlReceiver);
         super.onDestroy();
+    }
+
+    @Override
+    public void metadataResult(String asyncResult) {
+        Metadata m = new Metadata(asyncResult);
+        if (!m.getArtist().equals(artistText) && !m.getTitle().equals(titleText)) {
+            artistText = m.getArtist();
+            titleText = m.getTitle();
+            updateNotificationArtistTitle();
+            updateScreenArtistTitle();
+        }
     }
 }
