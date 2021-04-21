@@ -75,14 +75,18 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 try {
-                    RadioChannel newRadio = new RadioChannel();
-                    newRadio.setChannelNumber(PlayerService.radioChannels.size() + 1);
-                    newRadio.setChannelName(radiosArray.getJSONObject(position).getString("radio_name"));
-                    newRadio.setChannelURL(radiosArray.getJSONObject(position).getString("radio_stream"));
-                    newRadio.setChannelBitrate("128kb/s");
-                    newRadio.setChannelDescription(radiosArray.getJSONObject(position).getString("radio_tag"));
-                    newRadio.setChannelImage(R.drawable.logo_rmf);
+                    Radio newRadio = new Radio(PlayerService.radioChannels.size() + 1,
+                            PlayerService.radioChannels.size() + 1,
+                            radiosArray.getJSONObject(position).getString("radio_name"),
+                            radiosArray.getJSONObject(position).getString("radio_tag"),
+                            R.drawable.logo_rmf,
+                            radiosArray.getJSONObject(position).getString("radio_stream"));
                     PlayerService.radioChannels.add(newRadio);
+
+                    InternalDatabaseHandler db = new InternalDatabaseHandler(getApplicationContext());
+
+                    db.addRadio(newRadio);
+
                     Log.d("Test", "New radio added");
 
                 } catch (JSONException e) {
