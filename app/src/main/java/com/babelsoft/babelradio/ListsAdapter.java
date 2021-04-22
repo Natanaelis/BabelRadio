@@ -14,26 +14,32 @@ import java.util.Locale;
 public class ListsAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
-//    private final ArrayList<String> listInput;
-    private final ArrayList<String> subtitle;
 //    private final Integer[] imgid;
     private final Integer imgid;
-    private final ArrayList<String> listBeforeFilter = new ArrayList<>();
-    private final ArrayList<String> listAfterFilter;
+    private final ArrayList<String> listInputBeforeFilter = new ArrayList<>();
+    private final ArrayList<String> listInputAfterFilter;
+    private final ArrayList<String> tagsBeforeFilter = new ArrayList<>();
+    private final ArrayList<String> tagsAfterFilter;
+    private final ArrayList<String> streamsBeforeFilter = new ArrayList<>();
+    private final ArrayList<String> streamsAfterFilter;
 
     public ListsAdapter(Activity context, ArrayList<String> listInput, Integer imgid) {
-        this(context, listInput, null, imgid);
+        this(context, listInput, null, null, imgid);
     }
 
-    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> subtitle, Integer imgid) {
+    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams, Integer imgid) {
         super(context, R.layout.list, listInput);
         this.context = context;
-//        this.listInput = listInput;
-        this.subtitle = subtitle;
         this.imgid = imgid;
 
-        listBeforeFilter.addAll(listInput);
-        listAfterFilter = listInput;
+        listInputBeforeFilter.addAll(listInput);
+        listInputAfterFilter = listInput;
+        if (tags != null) {
+            tagsBeforeFilter.addAll(tags);
+            streamsBeforeFilter.addAll(streams);
+        }
+        tagsAfterFilter = tags;
+        streamsAfterFilter = streams;
     }
 
     public View getView(int position, View view, ViewGroup parent) {
@@ -46,17 +52,17 @@ public class ListsAdapter extends ArrayAdapter<String> {
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT);
-        if(subtitle == null) {
+        if(tagsAfterFilter == null) {
             params.setMargins(10, 40, 10, 10);
             subtitleText.setVisibility(TextView.INVISIBLE);
         }
         else {
             params.setMargins(10, 10, 10, 10);
             subtitleText.setVisibility(TextView.VISIBLE);
-            subtitleText.setText(subtitle.get(position));
+            subtitleText.setText(tagsAfterFilter.get(position));
         }
         titleText.setLayoutParams(params);
-        titleText.setText(listAfterFilter.get(position));
+        titleText.setText(listInputAfterFilter.get(position));
         imageView.setImageResource(imgid);
 
         return rowView;
@@ -64,13 +70,26 @@ public class ListsAdapter extends ArrayAdapter<String> {
 
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
-        listAfterFilter.clear();
+        listInputAfterFilter.clear();
+        if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
+            tagsAfterFilter.clear();
+            streamsAfterFilter.clear();
+        }
         if (charText.length() == 0) {
-            listAfterFilter.addAll(listBeforeFilter);
-        } else {
-            for (String item : listBeforeFilter) {
-                if (item.toLowerCase(Locale.getDefault()).contains(charText)) {
-                    listAfterFilter.add(item);
+            listInputAfterFilter.addAll(listInputBeforeFilter);
+            if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
+                tagsAfterFilter.addAll(tagsBeforeFilter);
+                streamsAfterFilter.addAll(streamsBeforeFilter);
+            }
+        }
+        else {
+            for (int i = 0; i < listInputBeforeFilter.size(); i++) {
+                if (listInputBeforeFilter.get(i).toLowerCase(Locale.getDefault()).contains(charText)) {
+                    listInputAfterFilter.add(listInputBeforeFilter.get(i));
+                    if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
+                        tagsAfterFilter.add(tagsBeforeFilter.get(i));
+                        streamsAfterFilter.add(streamsBeforeFilter.get(i));
+                    }
                 }
             }
         }

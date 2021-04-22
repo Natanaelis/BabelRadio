@@ -30,21 +30,20 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 //import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class PlayerService extends Service implements IMetadataAsyncResponse{
-    public static String artistText;
-    public static String titleText;
-    public static String channelName;
-    public static int channelImage;
+    public static Radio currentRadio;
+    private InternalDatabaseHandler db;
     public static PlayerStatus playerStatus = PlayerStatus.READY;
-    private int currentChannelTableNumber;
+    private int currentRadioNumber;
     private int currentVolume, startupVolume;
     private PlayerStatus playerPreviousStatus = PlayerStatus.READY;
-    public static ArrayList<Radio> radioChannels = new ArrayList<Radio>();
+    public static List<Radio> radioList = new ArrayList<Radio>();
     private MediaPlayer mp = null;
     private AudioManager am;
     private MediaSession ms;
@@ -70,6 +69,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
 
     @Override
     public void onCreate() {
+        loadRadios();
         loadSettings();
         initiateNotification();
         showNotification();
@@ -77,11 +77,13 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         initializeControlReceiver();
         initializeAudioChangeFocus();
         initializeMediaButtons();
-        registerChannels();
         resetArtistTitle();
-        setChannelNameIcon();
         playerStatusChanged(PlayerStatus.READY);
         rememberStartupVolume();
+        updateNotificationStatus();
+        updateNotificationArtistTitle();
+        updateScreenStatus();
+        updateScreenArtistTitle();
         autoPlay();
     }
 
@@ -126,7 +128,8 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         if (am.isBluetoothA2dpOn()) {
-            setVolumeMax();
+            int maxVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            setVolume(maxVolume);
         }
     }
 
@@ -259,7 +262,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         rememberCurrentVolume();
-                        setVolumeHalf();
+                        setVolume(currentVolume / 2);
                         break;
                 }
             }
@@ -294,17 +297,17 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     }
 
     public void updateNotificationArtistTitle() {
-        notificationView.setTextViewText(R.id.artist_text, artistText);
-        notificationView.setTextViewText(R.id.title_text, titleText);
+        notificationView.setTextViewText(R.id.artist_text, currentRadio.getRadioArtist());
+        notificationView.setTextViewText(R.id.title_text, currentRadio.getRadioTitle());
 
         builder.setCustomContentView(notificationView);
         startForeground(notificationId, builder.build());
     }
 
     private void updateNotificationStatus() {
-        notificationView.setTextViewText(R.id.channel_name_text, channelName);
-        notificationView.setTextViewText(R.id.status_text, playerStatus.getText());
-        notificationView.setImageViewResource(R.id.channel_icon, channelImage);
+        notificationView.setTextViewText(R.id.radio_name_text, currentRadio.getRadioName());
+        notificationView.setTextViewText(R.id.player_status_text, playerStatus.getText());
+        notificationView.setImageViewResource(R.id.radio_image, currentRadio.getRadioImage());
 
         if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_play);
         else notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_stop);
@@ -337,7 +340,8 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             updateA2dpDisplayTimer = null;
         }
         if (playerStatus != PlayerStatus.PLAYING) {
-            displayText = channelName + " (" + playerStatus.getText() + ")";
+//            displayText = channelName + " (" + playerStatus.getText() + ")";
+            displayText = currentRadio.getRadioName() + " (" + playerStatus.getText() + ")";
             updateA2dpDisplay(displayText);
         }
         else {
@@ -348,23 +352,28 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
                 public void run() {
                     switch (mode) {
                         case PLAYING:
-                            displayText = channelName + " (" + playerStatus.getText() + ")";
+//                            displayText = channelName + " (" + playerStatus.getText() + ")";
+                            displayText = currentRadio.getRadioName() + " (" + playerStatus.getText() + ")";
                             mode = DisplayMode.ARTIST;
                             break;
                         case ARTIST:
-                            displayText = artistText;
+//                            displayText = artistText;
+                            displayText = currentRadio.getRadioArtist();
                             mode = DisplayMode.TITLE;
                             break;
                         case TITLE:
-                            displayText = titleText;
-                            mode = DisplayMode.CATEGORY;
+//                            displayText = titleText;
+                            displayText = currentRadio.getRadioTitle();
+                            mode = DisplayMode.TAG;
                             break;
-                        case CATEGORY:
-                            displayText = "Category: " + radioChannels.get(currentChannelTableNumber).getRadioTag();
+                        case TAG:
+//                            displayText = radioList.get(currentRadioNumber).getRadioTag();
+                            displayText = currentRadio.getRadioTag();
                             mode = DisplayMode.BITRATE;
                             break;
                         case BITRATE:
-                            displayText = "Bitrate: " + radioChannels.get(currentChannelTableNumber).getRadioBitrate();
+//                            displayText = radioList.get(currentRadioNumber).getRadioBitrate();
+                            displayText = currentRadio.getRadioBitrate();
                             mode = DisplayMode.PLAYING;
                             break;
                     }
@@ -385,7 +394,8 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
                 MetadataTask mt = new MetadataTask();
                 mt.delegate = PlayerService.this;
                 try {
-                    mt.execute(new URL(radioChannels.get(currentChannelTableNumber).getRadioStream()));
+//                    mt.execute(new URL(radioList.get(currentRadioNumber).getRadioStream()));
+                    mt.execute(new URL(currentRadio.getRadioStream()));
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
@@ -436,22 +446,6 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             am.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
     }
 
-    private void setVolumeMax() {
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
-    }
-
-    private void setVolumeHalf() {
-        am.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume / 2, 0);
-    }
-
-    private void playRadio() {
-        stopPlay();
-
-        if (requestAudioFocus()) {
-            playMusic();
-        }
-    }
-
     private void onPlayClick() {
         if (playerStatus == PlayerStatus.READY) {
             playBeep(Beep.BUFFERING);
@@ -475,56 +469,55 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
 
     private void onPreviousClick() {
         playBeep(Beep.PREVIOUS);
-        if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
-            currentChannelTableNumber--;
-            if (currentChannelTableNumber < 0 ) {
-                currentChannelTableNumber = radioChannels.size() - 1;
+        if (radioList.size() > 0) {
+            if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
+                currentRadioNumber--;
+                if (currentRadioNumber < 0) {
+                    currentRadioNumber = radioList.size() - 1;
+                }
+                rememberCurrentRadioNumber();
             }
-            rememberCurrentChannelTableNumber();
-            setChannelNameIcon();
+            currentRadio = radioList.get(currentRadioNumber);
+            if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
+                playRadio();
+            } else if (playerStatus == PlayerStatus.READY) {
+                playerStatusChanged(PlayerStatus.READY);
+            }
+            resetArtistTitle();
+            updateScreenStatus();
+            updateScreenArtistTitle();
+            updateNotificationStatus();
+            updateNotificationArtistTitle();
         }
-        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
-            playRadio();
-        } else if (playerStatus == PlayerStatus.READY){
-            playerStatusChanged(PlayerStatus.READY);
-        }
-        resetArtistTitle();
-        updateScreenStatus();
-        updateScreenArtistTitle();
-        updateNotificationStatus();
-        updateNotificationArtistTitle();
     }
 
     private void onNextClick() {
         playBeep(Beep.NEXT);
-        if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
-            currentChannelTableNumber++;
-            if (currentChannelTableNumber > radioChannels.size() - 1 ) {
-                currentChannelTableNumber = 0;
+        if (radioList.size() > 0) {
+            if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
+                currentRadioNumber++;
+                if (currentRadioNumber > radioList.size() - 1 ) {
+                    currentRadioNumber = 0;
+                }
+            rememberCurrentRadioNumber();
             }
-            rememberCurrentChannelTableNumber();
-            setChannelNameIcon();
+            currentRadio = radioList.get(currentRadioNumber);
+            if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
+                playRadio();
+            } else if (playerStatus == PlayerStatus.READY){
+                playerStatusChanged(PlayerStatus.READY);
+            }
+            resetArtistTitle();
+            updateScreenStatus();
+            updateScreenArtistTitle();
+            updateNotificationStatus();
+            updateNotificationArtistTitle();
         }
-        if (playerStatus == PlayerStatus.PLAYING || playerStatus == PlayerStatus.BUFFERING) {
-            playRadio();
-        } else if (playerStatus == PlayerStatus.READY){
-            playerStatusChanged(PlayerStatus.READY);
-        }
-        resetArtistTitle();
-        updateScreenStatus();
-        updateScreenArtistTitle();
-        updateNotificationStatus();
-        updateNotificationArtistTitle();
     }
 
-    private void setChannelNameIcon() {
-        channelName = radioChannels.get(currentChannelTableNumber).getRadioName();
-        channelImage = radioChannels.get(currentChannelTableNumber).getRadioLogo();
-    }
-
-    private void rememberCurrentChannelTableNumber() {
+    private void rememberCurrentRadioNumber() {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(Settings.CURRENT_CHANNEL_TABLE_NUMBER.name(), currentChannelTableNumber);
+        editor.putInt(Settings.CURRENT_RADIO_NUMBER.name(), currentRadioNumber);
         editor.commit();
     }
 
@@ -572,15 +565,15 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         p7klem = new Radio(5, 5, "P7 Klem",
                 "Oldies", R.drawable.logo_p7_klem,
                 "https://p7.p4groupaudio.com/P07_MM");
-        radioChannels.add(radioZlotePrzeboje);
-        radioChannels.add(radioZET);
-        radioChannels.add(rmfFM);
-        radioChannels.add(smoothJazz);
-        radioChannels.add(p7klem);
+        radioList.add(radioZlotePrzeboje);
+        radioList.add(radioZET);
+        radioList.add(rmfFM);
+        radioList.add(smoothJazz);
+        radioList.add(p7klem);
 
         InternalDatabaseHandler db = new InternalDatabaseHandler(this);
 
-        int countRadios = db.getRadiosCount();
+        int countRadios = db.count();
         Log.e("Number of radios", String.valueOf(countRadios));
     }
 
@@ -628,8 +621,28 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
 
     private void loadSettings() {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
-//        currentChannelTableNumber = preferences.getInt(Settings.CURRENT_CHANNEL_TABLE_NUMBER.name(), 0);
-        currentChannelTableNumber = 0;
+        currentRadioNumber = preferences.getInt(Settings.CURRENT_RADIO_NUMBER.name(), 0);
+        if (currentRadioNumber > radioList.size() - 1) {
+            currentRadioNumber = 0;
+        }
+        else {
+            currentRadio = radioList.get(currentRadioNumber);
+        }
+    }
+
+    private void loadRadios() {
+        db = new InternalDatabaseHandler(this);
+        int numberOfRadios = db.count();
+
+        if (numberOfRadios > 0) {
+            radioList = db.getAllRadios();
+        }
+        else {
+            currentRadio = new Radio(0, 0, "No Radio Stations to play",
+                    "", R.drawable.ic_launcher_foreground, "");
+            currentRadio.setRadioArtist("Add New Radio Station");
+            currentRadio.setRadioTitle("Use top right button to find and add radio");
+        }
     }
 
     private void autoPlay() {
@@ -638,54 +651,58 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     }
     
     private void resetArtistTitle() {
-        artistText = "Artist";
-        titleText = "Title";
+        currentRadio.setRadioArtist("Artist");
+        currentRadio.setRadioTitle("Title");
     }
 
-    private void playMusic() {
-        playerStatusChanged(PlayerStatus.BUFFERING);
-        reBufferingCountDown();
+    private void playRadio() {
+        stopPlay();
 
-        try {
-            mp = new MediaPlayer();
-            mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            mp.setDataSource(radioChannels.get(currentChannelTableNumber).getRadioStream());
-            mp.prepareAsync();
+        if (requestAudioFocus()) {
+            playerStatusChanged(PlayerStatus.BUFFERING);
+            reBufferingCountDown();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            try {
+                mp = new MediaPlayer();
+                mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                mp.setDataSource(currentRadio.getRadioStream());
+                mp.prepareAsync();
 
-        mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer player) {
-                if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
-                    stopBufferingCountDown();
-                    mp.start();
-                    playerStatusChanged(PlayerStatus.PLAYING);
-                    downloadMetaData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer player) {
+                    if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
+                        stopBufferingCountDown();
+                        mp.start();
+                        playerStatusChanged(PlayerStatus.PLAYING);
+                        downloadMetaData();
+                    }
                 }
-            }
-        });
+            });
 
-        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                playBeep(Beep.BUFFERING);
-                playRadio();
-            }
-        });
-
-        mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-            @Override
-            public boolean onInfo(MediaPlayer mediaPlayer, int info, int extra) {
-                if (info == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
                     playBeep(Beep.BUFFERING);
                     playRadio();
                 }
-                return false;
-            }
-        });
+            });
+
+            mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                @Override
+                public boolean onInfo(MediaPlayer mediaPlayer, int info, int extra) {
+                    if (info == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+                        playBeep(Beep.BUFFERING);
+                        playRadio();
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
@@ -705,9 +722,9 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     @Override
     public void metadataResult(String asyncResult) {
         Metadata m = new Metadata(asyncResult);
-        if (!m.getArtist().equals(artistText) && !m.getTitle().equals(titleText)) {
-            artistText = m.getArtist();
-            titleText = m.getTitle();
+        if (!m.getArtist().equals(currentRadio.getRadioArtist()) && !m.getTitle().equals(currentRadio.getRadioTitle())) {
+            currentRadio.setRadioArtist(m.getArtist());
+            currentRadio.setRadioTitle(m.getTitle());
             updateNotificationArtistTitle();
             updateScreenArtistTitle();
         }

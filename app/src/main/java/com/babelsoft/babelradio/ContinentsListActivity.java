@@ -21,8 +21,7 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
     String inputUrl = "https://babelradio.000webhostapp.com/countries.php";
     ListView list;
     SearchView searchView;
-//    ArrayList<String> continents = new ArrayList<>();
-    static ArrayList<String> listInput = new ArrayList<>();
+    ArrayList<String> listInput = new ArrayList<>();
     static String databaseResponse;
 
     //    Integer[] imgid = {R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide,
@@ -127,16 +126,4 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
         finish();
         Runtime.getRuntime().gc();
     }
-
-/*
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if(listInput != null) {
-            listInput.clear();
-            listInput = null;
-        }
-//        Runtime.getRuntime().gc();
-    }
-*/
 }

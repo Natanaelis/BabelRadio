@@ -1,8 +1,9 @@
 package com.babelsoft.babelradio;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,14 +13,13 @@ import android.support.v7.app.AppCompatActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RadiosListActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
     ListView listView;
     SearchView searchView;
-    static ArrayList<String> listInput = new ArrayList<>();
+    ArrayList<String> listInput = new ArrayList<>();
     ArrayList<String> tags = new ArrayList<>();
+    ArrayList<String> streams = new ArrayList<>();
     JSONArray radiosArray;
 
     //    Integer[] imgid = {R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide,
@@ -38,6 +38,7 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
             for (int i = 0; i < radiosArray.length(); i++) {
                 listInput.add(radiosArray.getJSONObject(i).getString("radio_name"));
                 tags.add(radiosArray.getJSONObject(i).getString("radio_tag"));
+                streams.add(radiosArray.getJSONObject(i).getString("radio_stream"));
             }
             initiateView();
         } catch (JSONException e) {
@@ -52,7 +53,7 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
         setContentView(R.layout.list_view);
         setupActionBar();
 
-        final ListsAdapter adapter = new ListsAdapter(this, listInput, tags, imgid);
+        final ListsAdapter adapter = new ListsAdapter(this, listInput, tags, streams, imgid);
         listView = (ListView) findViewById(R.id.list);
         searchView = (SearchView) findViewById(R.id.search);
 
@@ -74,36 +75,20 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                try {
-                    Radio newRadio = new Radio(PlayerService.radioChannels.size() + 1,
-                            PlayerService.radioChannels.size() + 1,
-                            radiosArray.getJSONObject(position).getString("radio_name"),
-                            radiosArray.getJSONObject(position).getString("radio_tag"),
+                Radio newRadio = new Radio(PlayerService.radioList.size() + 1,
+                            PlayerService.radioList.size() + 1,
+                            listInput.get(position),
+                            tags.get(position),
                             R.drawable.logo_rmf,
-                            radiosArray.getJSONObject(position).getString("radio_stream"));
-                    PlayerService.radioChannels.add(newRadio);
+                            streams.get(position));
+                PlayerService.currentRadio = newRadio;
+                NavUtils.navigateUpTo(RadiosListActivity.this, new Intent(getBaseContext(), BabelRadioApp.class));
 
-                    InternalDatabaseHandler db = new InternalDatabaseHandler(getApplicationContext());
-
-                    db.addRadio(newRadio);
-
-                    Log.d("Test", "New radio added");
-
-                } catch (JSONException e) {
-                    e.getStackTrace();
-                }
+                stopPlayRadio();
+                startPlayRadio();
             }
         });
     }
-
-    private void getRadios(String radio) {
-        Map<String, String> postData = new HashMap<>();
-        postData.put("radio", radio);
-        HttpPostAsync httpPost = new HttpPostAsync(postData);
-        httpPost.delegate = this;
-//        httpPost.execute(radiosUrl);
-    }
-
 
     @Override
     public void postResult(String asyncResult) {
@@ -140,15 +125,15 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
         Runtime.getRuntime().gc();
     }
 
-/*
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if(listInput != null) {
-            listInput.clear();
-            listInput = null;
-        }
-//        Runtime.getRuntime().gc();
+    private void startPlayRadio() {
+        Intent playRadioIntent = new Intent();
+        playRadioIntent.setAction(ControlAction.PLAY.name());
+        sendBroadcast(playRadioIntent);
     }
-*/
+
+    private void stopPlayRadio() {
+        Intent stopRadioIntent = new Intent();
+        stopRadioIntent.setAction(ControlAction.STOP.name());
+        sendBroadcast(stopRadioIntent);
+    }
 }

@@ -29,8 +29,6 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     private String inputUrl = "https://babelradio.000webhostapp.com/continents.php";
     public static String databaseResponse;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,18 +135,21 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     }
 
     private void updateScreenArtistTitle() {
-        txtArtistTextView.setText(PlayerService.artistText);
-        txtTitleTextView.setText(PlayerService.titleText);
+//        txtArtistTextView.setText(PlayerService.artistText);
+//        txtTitleTextView.setText(PlayerService.titleText);
+        txtArtistTextView.setText(PlayerService.currentRadio.getRadioArtist());
+        txtTitleTextView.setText(PlayerService.currentRadio.getRadioTitle());
     }
 
     private void updateScreenStatus() {
-        String channelTextNew = PlayerService.channelName;
+//        String channelTextNew = PlayerService.channelName;
+        String channelTextNew = PlayerService.currentRadio.getRadioName();
         String channelTextOld = txtChannel.getText().toString();
         if (channelTextNew != null && !channelTextNew.equals(channelTextOld)) {
             txtChannel.setText(channelTextNew);
         }
         txtPlayerStatusTextView.setText(PlayerService.playerStatus.getText());
-        imgRadioImage.setImageResource(PlayerService.channelImage);
+        imgRadioImage.setImageResource(PlayerService.currentRadio.getRadioImage());
 
         if (PlayerService.playerStatus == PlayerStatus.READY)
             btnPlayStop.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
@@ -196,5 +197,4 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
         stopPlayerService();
         super.onDestroy();
     }
-
 }

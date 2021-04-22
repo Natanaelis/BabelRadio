@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class InternalDatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "radiosManager";
@@ -52,7 +51,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_RADIO_ID, radio.getRadioId());
         values.put(KEY_RADIO_NAME, radio.getRadioName());
         values.put(KEY_RADIO_TAG, radio.getRadioTag());
-        values.put(KEY_RADIO_LOGO, radio.getRadioLogo());
+        values.put(KEY_RADIO_LOGO, radio.getRadioImage());
         values.put(KEY_RADIO_STREAM, radio.getRadioStream());
 
         // Inserting Row
@@ -80,7 +79,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
     }
 
     // code to get all radios in a list view
-    public List<Radio> getAllContacts() {
+    public List<Radio> getAllRadios() {
         List<Radio> radioList = new ArrayList<Radio>();
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_RADIOS;
@@ -125,7 +124,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Getting radios Count
-    public int getRadiosCount() {
+    public int count() {
         int count;
         String countQuery = "SELECT  * FROM " + TABLE_RADIOS;
         SQLiteDatabase db = this.getReadableDatabase();

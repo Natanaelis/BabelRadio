@@ -4,6 +4,6 @@ public enum DisplayMode {
     PLAYING,
     ARTIST,
     TITLE,
-    CATEGORY,
+    TAG,
     BITRATE;
 }

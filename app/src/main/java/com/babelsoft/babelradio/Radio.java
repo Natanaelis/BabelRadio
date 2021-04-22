@@ -5,17 +5,19 @@ public class Radio {
     private int radioId;
     private String radioName;
     private String radioTag;
-    private int radioLogo;
+    private int radioImage;
     private String radioStream;
     private String radioBitrate = "128kb";
+    private String radioArtist = "Artist";
+    private String radioTitle = "Title";
 
     public Radio(int radioInternalId, int radioId, String radioName, String radioTag,
-            int radioLogo, String radioStream) {
+                 int radioImage, String radioStream) {
         this.radioInternalId = radioInternalId;
         this.radioId = radioId;
         this.radioName = radioName;
         this.radioTag = radioTag;
-        this.radioLogo = radioLogo;
+        this.radioImage = radioImage;
         this.radioStream = radioStream;
     }
 
@@ -43,8 +45,16 @@ public class Radio {
         this.radioTag = radioTag;
     }
 
-    void setRadioLogo(int radioLogo) {
-        this.radioLogo = radioLogo;
+    void setRadioImage(int radioImage) {
+        this.radioImage = radioImage;
+    }
+
+    void setRadioArtist(String radioArtist) {
+        this.radioArtist = radioArtist;
+    }
+
+    void setRadioTitle(String radioTitle) {
+        this.radioTitle = radioTitle;
     }
 
     int getRadioInternalId() {
@@ -71,7 +81,15 @@ public class Radio {
         return radioTag;
     }
 
-    int getRadioLogo() {
-        return radioLogo;
+    int getRadioImage() {
+        return radioImage;
+    }
+
+    String getRadioArtist() {
+        return radioArtist;
+    }
+
+    String getRadioTitle() {
+        return radioTitle;
     }
 }
