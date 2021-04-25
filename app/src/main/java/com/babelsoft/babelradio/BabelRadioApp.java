@@ -149,7 +149,7 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
             txtChannel.setText(channelTextNew);
         }
         txtPlayerStatusTextView.setText(PlayerService.playerStatus.getText());
-        imgRadioImage.setImageResource(PlayerService.currentRadio.getRadioImage());
+        imgRadioImage.setImageBitmap(DbBitmapUtility.getBitmap(PlayerService.currentRadio.getRadioImage()));
 
         if (PlayerService.playerStatus == PlayerStatus.READY)
             btnPlayStop.setImageDrawable(getResources().getDrawable(R.drawable.button_play));

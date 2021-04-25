@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -33,8 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-//import wseemann.media.FFmpegMediaMetadataRetriever;
 
 public class PlayerService extends Service implements IMetadataAsyncResponse{
     public static Radio currentRadio;
@@ -307,7 +307,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     private void updateNotificationStatus() {
         notificationView.setTextViewText(R.id.radio_name_text, currentRadio.getRadioName());
         notificationView.setTextViewText(R.id.player_status_text, playerStatus.getText());
-        notificationView.setImageViewResource(R.id.radio_image, currentRadio.getRadioImage());
+        notificationView.setImageViewBitmap(R.id.radio_image, DbBitmapUtility.getBitmap(currentRadio.getRadioImage()));
 
         if (playerStatus == PlayerStatus.READY) notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_play);
         else notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_stop);
@@ -547,7 +547,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             reBufferingTimer = null;
         }
     }
-
+/*
     // TODO To be moved to server
     private void registerChannels() {
         radioZlotePrzeboje = new Radio(1,1,"Radio Złote Przeboje",
@@ -576,7 +576,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         int countRadios = db.count();
         Log.e("Number of radios", String.valueOf(countRadios));
     }
-
+*/
     private void playBeep(Beep beep) {
         MediaPlayer mpBeep;
         if (beep == Beep.BUFFERING) mpBeep = MediaPlayer.create(this, R.raw.beep_low_3x);
@@ -638,8 +638,11 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             radioList = db.getAllRadios();
         }
         else {
+            Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.nologo);
+
+
             currentRadio = new Radio(0, 0, "No Radio Stations to play",
-                    "", R.drawable.ic_launcher_foreground, "");
+                    "", DbBitmapUtility.getBytes(image), "");
             currentRadio.setRadioArtist("Add New Radio Station");
             currentRadio.setRadioTitle("Use top right button to find and add radio");
         }

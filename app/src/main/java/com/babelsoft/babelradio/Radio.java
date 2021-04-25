@@ -1,18 +1,20 @@
 package com.babelsoft.babelradio;
 
+import android.graphics.Bitmap;
+
 public class Radio {
     private int radioInternalId;
     private int radioId;
     private String radioName;
     private String radioTag;
-    private int radioImage;
+    private byte[] radioImage;
     private String radioStream;
     private String radioBitrate = "128kb";
     private String radioArtist = "Artist";
     private String radioTitle = "Title";
 
     public Radio(int radioInternalId, int radioId, String radioName, String radioTag,
-                 int radioImage, String radioStream) {
+                 byte[] radioImage, String radioStream) {
         this.radioInternalId = radioInternalId;
         this.radioId = radioId;
         this.radioName = radioName;
@@ -21,75 +23,75 @@ public class Radio {
         this.radioStream = radioStream;
     }
 
-    void setRadioInternalId(int radioInternalId) {
+    public void setRadioInternalId(int radioInternalId) {
         this.radioInternalId = radioInternalId;
     }
 
-    void setRadioId(int radioId) {
+    public void setRadioId(int radioId) {
         this.radioId = radioId;
     }
 
-    void setRadioName(String radioName) {
+    public void setRadioName(String radioName) {
         this.radioName = radioName;
     }
 
-    void setRadioStream(String radioStream) {
+    public void setRadioStream(String radioStream) {
         this.radioStream = radioStream;
     }
 
-    void setRadioBitrate(String radioBitrate) {
+    public void setRadioBitrate(String radioBitrate) {
         this.radioBitrate = radioBitrate;
     }
 
-    void setRadioTag(String radioTag) {
+    public void setRadioTag(String radioTag) {
         this.radioTag = radioTag;
     }
 
-    void setRadioImage(int radioImage) {
+    public void setRadioImage(byte[] radioImage) {
         this.radioImage = radioImage;
     }
 
-    void setRadioArtist(String radioArtist) {
+    public void setRadioArtist(String radioArtist) {
         this.radioArtist = radioArtist;
     }
 
-    void setRadioTitle(String radioTitle) {
+    public void setRadioTitle(String radioTitle) {
         this.radioTitle = radioTitle;
     }
 
-    int getRadioInternalId() {
+    public int getRadioInternalId() {
         return radioInternalId;
     }
 
-    int getRadioId() {
+    public int getRadioId() {
         return radioId;
     }
 
-    String getRadioName() {
+    public String getRadioName() {
         return radioName;
     }
 
-    String getRadioStream() {
+    public String getRadioStream() {
         return radioStream;
     }
 
-    String getRadioBitrate() {
+    public String getRadioBitrate() {
         return radioBitrate;
     }
 
-    String getRadioTag() {
+    public String getRadioTag() {
         return radioTag;
     }
 
-    int getRadioImage() {
+    public byte[] getRadioImage() {
         return radioImage;
     }
 
-    String getRadioArtist() {
+    public String getRadioArtist() {
         return radioArtist;
     }
 
-    String getRadioTitle() {
+    public  String getRadioTitle() {
         return radioTitle;
     }
 }

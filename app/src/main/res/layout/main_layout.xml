@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="150dp"
+            android:layout_marginTop="180dp"
             android:textSize="24dp"
             android:textStyle="bold"
             android:text="Radio Channel"
@@ -54,12 +54,13 @@
 
         <ImageView
             android:id="@+id/radioImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="300dp"
+            android:layout_height="168dp"
+            android:padding="5dp"
             android:layout_below="@+id/channelTextView"
             android:layout_marginTop="25dp"
             android:layout_centerHorizontal="true"
-            app:srcCompat="@drawable/logo_p7_klem" />
+            app:srcCompat="@drawable/nologo" />
 
         <TextView
             android:id="@+id/txtArtistTextView"

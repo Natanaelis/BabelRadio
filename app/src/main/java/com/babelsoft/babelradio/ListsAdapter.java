@@ -1,6 +1,7 @@
 package com.babelsoft.babelradio;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,25 +16,32 @@ public class ListsAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
 //    private final Integer[] imgid;
-    private final Integer imgid;
+//    private final Integer imgid;
     private final ArrayList<String> listInputBeforeFilter = new ArrayList<>();
     private final ArrayList<String> listInputAfterFilter;
     private final ArrayList<String> tagsBeforeFilter = new ArrayList<>();
     private final ArrayList<String> tagsAfterFilter;
     private final ArrayList<String> streamsBeforeFilter = new ArrayList<>();
     private final ArrayList<String> streamsAfterFilter;
+    private final ArrayList<Bitmap> imagesBeforeFilter = new ArrayList<>();
+    private final ArrayList<Bitmap> imagesAfterFilter;
 
-    public ListsAdapter(Activity context, ArrayList<String> listInput, Integer imgid) {
-        this(context, listInput, null, null, imgid);
+//    public ListsAdapter(Activity context, ArrayList<String> listInput, Integer imgid) {
+    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<Bitmap> images) {
+//        this(context, listInput, null, null, imgid);
+        this(context, listInput, null, null, images);
     }
 
-    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams, Integer imgid) {
+//    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams, Integer imgid) {
+    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams, ArrayList<Bitmap> images) {
         super(context, R.layout.list, listInput);
         this.context = context;
-        this.imgid = imgid;
+//        this.imgid = imgid;
 
         listInputBeforeFilter.addAll(listInput);
         listInputAfterFilter = listInput;
+        imagesBeforeFilter.addAll(images);
+        imagesAfterFilter = images;
         if (tags != null) {
             tagsBeforeFilter.addAll(tags);
             streamsBeforeFilter.addAll(streams);
@@ -63,7 +71,8 @@ public class ListsAdapter extends ArrayAdapter<String> {
         }
         titleText.setLayoutParams(params);
         titleText.setText(listInputAfterFilter.get(position));
-        imageView.setImageResource(imgid);
+//        imageView.setImageResource(imgid);
+        imageView.setImageBitmap(imagesAfterFilter.get(position));
 
         return rowView;
     }
@@ -71,12 +80,14 @@ public class ListsAdapter extends ArrayAdapter<String> {
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
         listInputAfterFilter.clear();
+        imagesAfterFilter.clear();
         if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
             tagsAfterFilter.clear();
             streamsAfterFilter.clear();
         }
         if (charText.length() == 0) {
             listInputAfterFilter.addAll(listInputBeforeFilter);
+            imagesAfterFilter.addAll(imagesBeforeFilter);
             if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
                 tagsAfterFilter.addAll(tagsBeforeFilter);
                 streamsAfterFilter.addAll(streamsBeforeFilter);
@@ -86,6 +97,7 @@ public class ListsAdapter extends ArrayAdapter<String> {
             for (int i = 0; i < listInputBeforeFilter.size(); i++) {
                 if (listInputBeforeFilter.get(i).toLowerCase(Locale.getDefault()).contains(charText)) {
                     listInputAfterFilter.add(listInputBeforeFilter.get(i));
+                    imagesAfterFilter.add(imagesBeforeFilter.get(i));
                     if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
                         tagsAfterFilter.add(tagsBeforeFilter.get(i));
                         streamsAfterFilter.add(streamsBeforeFilter.get(i));

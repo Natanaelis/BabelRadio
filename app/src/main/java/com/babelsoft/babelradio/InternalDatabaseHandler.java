@@ -16,7 +16,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_RADIO_ID = "radio_id";
     private static final String KEY_RADIO_NAME = "radio_name";
     private static final String KEY_RADIO_TAG = "radio_tag";
-    private static final String KEY_RADIO_LOGO = "radio_logo";
+    private static final String KEY_RADIO_IMAGE = "radio_image";
     private static final String KEY_RADIO_STREAM = "radio_stream";
 
     public InternalDatabaseHandler(Context context) {
@@ -29,7 +29,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         String CREATE_RADIOS_TABLE = "CREATE TABLE " + TABLE_RADIOS + "("
                 + KEY_RADIO_INTERNAL_ID + " INTEGER PRIMARY KEY," + KEY_RADIO_ID + " INTEGER,"
                 + KEY_RADIO_NAME + " TEXT," + KEY_RADIO_TAG + " TEXT,"
-                + KEY_RADIO_LOGO + " TEXT," + KEY_RADIO_STREAM + " TEXT"+ ")";
+                + KEY_RADIO_IMAGE + " BLOB," + KEY_RADIO_STREAM + " TEXT"+ ")";
         db.execSQL(CREATE_RADIOS_TABLE);
     }
 
@@ -51,7 +51,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_RADIO_ID, radio.getRadioId());
         values.put(KEY_RADIO_NAME, radio.getRadioName());
         values.put(KEY_RADIO_TAG, radio.getRadioTag());
-        values.put(KEY_RADIO_LOGO, radio.getRadioImage());
+        values.put(KEY_RADIO_IMAGE, radio.getRadioImage());
         values.put(KEY_RADIO_STREAM, radio.getRadioStream());
 
         // Inserting Row
@@ -65,7 +65,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_RADIOS, new String[] { KEY_RADIO_INTERNAL_ID,
-                        KEY_RADIO_ID, KEY_RADIO_NAME, KEY_RADIO_TAG, KEY_RADIO_LOGO,
+                        KEY_RADIO_ID, KEY_RADIO_NAME, KEY_RADIO_TAG, KEY_RADIO_IMAGE,
                         KEY_RADIO_STREAM}, KEY_RADIO_INTERNAL_ID + "=?",
                 new String[] { String.valueOf(id) }, null, null, null, null);
         if (cursor != null)
@@ -73,7 +73,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
 
         Radio radio = new Radio(Integer.parseInt(cursor.getString(0)),
                 Integer.parseInt(cursor.getString(1)), cursor.getString(2),
-                cursor.getString(3), cursor.getInt(4), cursor.getString(5));
+                cursor.getString(3), cursor.getBlob(4), cursor.getString(5));
         // return contact
         return radio;
     }
@@ -92,7 +92,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
             do {
                 Radio radio = new Radio(Integer.parseInt(cursor.getString(0)),
                         Integer.parseInt(cursor.getString(1)), cursor.getString(2),
-                        cursor.getString(3), cursor.getInt(4), cursor.getString(5));
+                        cursor.getString(3), cursor.getBlob(4), cursor.getString(5));
                 // Adding radio to list
                 radioList.add(radio);
             } while (cursor.moveToNext());

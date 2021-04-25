@@ -1,50 +1,57 @@
 package com.babelsoft.babelradio;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.support.v7.app.AppCompatActivity;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ContinentsListActivity extends AppCompatActivity implements IHttpPostAsyncResponse {
-    String inputUrl = "https://babelradio.000webhostapp.com/countries.php";
-    ListView list;
-    SearchView searchView;
-    ArrayList<String> listInput = new ArrayList<>();
-    static String databaseResponse;
-
-    //    Integer[] imgid = {R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide, R.drawable.worldwide,
-//            R.drawable.worldwide};
-    Integer imgid = R.drawable.worldwide;
+    private String inputUrl = "https://babelradio.000webhostapp.com/countries.php";
+    private ListView list;
+    private SearchView searchView;
+    private ProgressBar progressBar;
+    public static String databaseResponse;
+    private ArrayList<String> listInput = new ArrayList<>();
+    private ArrayList<Bitmap> images = new ArrayList<Bitmap>();
+    private JSONArray continentsArray = null;
+    private String response;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.list_view);
+        progressBar = (ProgressBar)findViewById(R.id.loading);
+        list = (ListView)findViewById(R.id.list);
+        searchView = (SearchView)findViewById(R.id.search);
 
-        JSONArray continentsArray = null;
+        setupActionBar();
+
         listInput.clear();
-        String response = BabelRadioApp.databaseResponse;
+        response = BabelRadioApp.databaseResponse;
         try {
             continentsArray = new JSONArray(response);
             for (int i = 0; i < continentsArray.length(); i++) {
                 listInput.add(continentsArray.getJSONObject(i).getString("continent_name"));
             }
-            initiateView();
+            createImagesList();
+            showList();
         } catch (JSONException e) {
             listInput.add(response);
-            imgid = R.drawable.error;
-            initiateView();
+            images.add(BitmapFactory.decodeResource(this.getResources(), R.drawable.error));
+            showList();
         }
     }
 
@@ -56,16 +63,11 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
         httpPost.execute(inputUrl);
     }
 
-    private void initiateView() {
-        setContentView(R.layout.list_view);
-        setupActionBar();
+    private void showList() {
+        final ListsAdapter adapter = new ListsAdapter(this, listInput, images);
 
-        final ListsAdapter adapter = new ListsAdapter(this, listInput, imgid);
-        list = (ListView)findViewById(R.id.list);
-        searchView = (SearchView)findViewById(R.id.search);
-
+        progressBar.setVisibility(View.GONE);
         list.setAdapter(adapter);
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -87,6 +89,12 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
                 getInput(listInput.get(position));
             }
         });
+    }
+
+    private void createImagesList() {
+        for (int i = 0; i < 6; i++) {
+            images.add(BitmapFactory.decodeResource(this.getResources(), R.drawable.worldwide));
+        }
     }
 
     @Override
@@ -120,9 +128,24 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if(listInput != null) {
+/*        if (listInput != null) {
             listInput.clear();
+            listInput = null;
         }
+        if (images != null) {
+            images.clear();
+            images = null;
+        }
+        if(continentsArray != null) {
+            continentsArray = null;
+        }
+        if(response != null) {
+            response = null;
+        }
+        if (databaseResponse != null) {
+            databaseResponse = null;
+        }
+*/
         finish();
         Runtime.getRuntime().gc();
     }
