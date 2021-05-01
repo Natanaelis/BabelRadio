@@ -42,12 +42,7 @@ public class FavoritesListActivity extends AppCompatActivity {
         setupActionBar();
 
         InternalDatabaseHandler idh = new InternalDatabaseHandler(getApplicationContext());
-/*
-        listInput.clear();
-        tags.clear();
-        streams.clear();
-        images.clear();
-*/
+
         List<Radio> inputRadios = idh.getAllRadios();
 
         for (int i = 0; i < inputRadios.size(); i++) {
@@ -125,38 +120,16 @@ public class FavoritesListActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-/*        if (listInput != null) {
-            listInput.clear();
-            listInput = null;
-        }
-        if (images != null) {
-            images.clear();
-            images = null;
-        }
-        if(continentsArray != null) {
-            continentsArray = null;
-        }
-        if(response != null) {
-            response = null;
-        }
-        if (databaseResponse != null) {
-            databaseResponse = null;
-        }
-*/
         finish();
         Runtime.getRuntime().gc();
     }
 
     private void startPlayRadio() {
-        Intent playRadioIntent = new Intent();
-        playRadioIntent.setAction(ControlAction.PLAY.name());
-        sendBroadcast(playRadioIntent);
+        sendBroadcast(new Intent(ControlAction.PLAY.name()));
     }
 
     private void stopPlayRadio() {
-        Intent stopRadioIntent = new Intent();
-        stopRadioIntent.setAction(ControlAction.STOP.name());
-        sendBroadcast(stopRadioIntent);
+        sendBroadcast(new Intent(ControlAction.STOP.name()));
     }
 
 }

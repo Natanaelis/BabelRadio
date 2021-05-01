@@ -211,15 +211,11 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
     }
 
     private void startPlayRadio() {
-        Intent playRadioIntent = new Intent();
-        playRadioIntent.setAction(ControlAction.PLAY.name());
-        sendBroadcast(playRadioIntent);
+        sendBroadcast(new Intent(ControlAction.PLAY.name()));
     }
 
     private void stopPlayRadio() {
-        Intent stopRadioIntent = new Intent();
-        stopRadioIntent.setAction(ControlAction.STOP.name());
-        sendBroadcast(stopRadioIntent);
+        sendBroadcast(new Intent(ControlAction.STOP.name()));
     }
 
 }

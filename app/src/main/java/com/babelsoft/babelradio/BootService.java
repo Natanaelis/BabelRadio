@@ -181,9 +181,7 @@ public class BootService extends Service {
         else {
             if (preferences.getBoolean(Settings.RUN_SERVICE_AFTER_A2DP_CONNECTED.name(), true) &&
                     preferences.getBoolean(Settings.AUTO_PLAY_AFTER_A2DP_CONNECTED.name(), false)) {
-                Intent autoPlayIntent = new Intent();
-                autoPlayIntent.setAction(ControlAction.PLAY.name());
-                sendBroadcast(autoPlayIntent);
+                sendBroadcast(new Intent(ControlAction.PLAY.name()));
             }
         }
     }
