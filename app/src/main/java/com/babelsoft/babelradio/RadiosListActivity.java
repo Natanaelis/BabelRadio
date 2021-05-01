@@ -11,19 +11,26 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
 
-public class RadiosListActivity extends AppCompatActivity implements IHttpPostAsyncResponse, IImageAsyncResponse {
+public class RadiosListActivity extends AppCompatActivity implements IImageAsyncResponse {
     private ListView listView;
     private SearchView searchView;
+    private TextView searchText;
+    private TextView searchNumber;
     private ProgressBar progressBar;
+    private Button searchNextButton;
+    private Button searchPreviousButton;
     private ArrayList<String> listInput = new ArrayList<>();
     private ArrayList<String> tags = new ArrayList<>();
     private ArrayList<String> streams = new ArrayList<>();
@@ -31,6 +38,10 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
     private ArrayList<String> imagesUrl = new ArrayList<>();
     private JSONArray radiosArray = null;
     private String response;
+    int numberOfRadios;
+    private int numberOfPages = 1;
+    private int currentPage;
+    private int arrayStart, arrayEnd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,19 +50,20 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
         progressBar = (ProgressBar)findViewById(R.id.loading);
         listView = (ListView) findViewById(R.id.list);
         searchView = (SearchView) findViewById(R.id.search);
+        searchText = (TextView)findViewById(R.id.searchTitle);
+        searchNumber = (TextView)findViewById(R.id.searchNumber);
+        searchNextButton = (Button)findViewById(R.id.searchNextButton);
+        searchPreviousButton = (Button)findViewById(R.id.searchPrevButton);
 
         setupActionBar();
-
-        listInput.clear();
+        currentPage = getIntent().getIntExtra("Page", 1);
         response = CountriesListActivity.databaseResponse;
+
         try {
             radiosArray = new JSONArray(response);
-            for (int i = 0; i < radiosArray.length(); i++) {
-                listInput.add(radiosArray.getJSONObject(i).getString("radio_name"));
-                tags.add(radiosArray.getJSONObject(i).getString("radio_tag"));
-                streams.add(radiosArray.getJSONObject(i).getString("radio_stream"));
-                imagesUrl.add(radiosArray.getJSONObject(i).getString("radio_image"));
-            }
+            numberOfRadios = radiosArray.length();
+            numberOfPages = Math.abs(numberOfRadios / 100) + 1;
+            readRadiosData();
             downloadImages();
         } catch (JSONException e) {
             listInput.add(response);
@@ -61,11 +73,37 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
         }
     }
 
+    private void readRadiosData() {
+        countArrayStartEnd();
+
+        try {
+            for (int i = arrayStart; i <= arrayEnd; i++) {
+                listInput.add(radiosArray.getJSONObject(i).getString("radio_name"));
+                tags.add(radiosArray.getJSONObject(i).getString("radio_tag"));
+                streams.add(radiosArray.getJSONObject(i).getString("radio_stream"));
+                imagesUrl.add(radiosArray.getJSONObject(i).getString("radio_image"));
+            }
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void showList() {
         final ListsAdapter adapter = new ListsAdapter(this, listInput, tags, streams, images);
 
-        progressBar.setVisibility(View.GONE);
         listView.setAdapter(adapter);
+        progressBar.setVisibility(View.INVISIBLE);
+        if (numberOfPages > 1)
+            searchNextButton.setVisibility(View.VISIBLE);
+        if (currentPage == numberOfPages)
+            searchNextButton.setVisibility(View.INVISIBLE);
+        if (currentPage > 1)
+            searchPreviousButton.setVisibility(View.VISIBLE);
+        searchView.setVisibility(View.VISIBLE);
+        searchText.setVisibility(View.VISIBLE);
+        searchNumber.setText(String.valueOf((arrayStart + 1) + "-" + (arrayEnd + 1) + " \\ " + numberOfRadios));
+        searchNumber.setVisibility(View.VISIBLE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -96,17 +134,34 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
                 startPlayRadio();
             }
         });
+
+        searchNextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(RadiosListActivity.this, RadiosListActivity.class);
+                myIntent.putExtra("Page", currentPage + 1);
+                startActivity(myIntent);
+            }
+        });
+
+        searchPreviousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
     }
 
-    @Override
-    public void postResult(String asyncResult) {
-
+    private void countArrayStartEnd() {
+        arrayStart = (currentPage - 1) * 100;
+        arrayEnd = (numberOfRadios - arrayStart > 100) ? arrayEnd = (currentPage * 100) - 1 : numberOfRadios - 1;
     }
 
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle("Radios");
+            actionBar.setSubtitle(CountriesListActivity.subtitle);
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }
@@ -126,11 +181,11 @@ public class RadiosListActivity extends AppCompatActivity implements IHttpPostAs
     public void imageResult(Bitmap asyncImage) {
         if (asyncImage != null) {
             images.add(asyncImage);
-            progressBar.setProgress(images.size());
         }
         else {
             images.add(BitmapFactory.decodeResource(this.getResources(), R.drawable.nologo));
         }
+        progressBar.setProgress(images.size());
         if (images.size() == imagesUrl.size()) {
             showList();
         }

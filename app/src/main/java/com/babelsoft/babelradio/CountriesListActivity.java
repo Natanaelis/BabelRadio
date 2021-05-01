@@ -12,6 +12,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.ArrayList;
@@ -23,8 +25,11 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
     private String[] flagsUrl = {"https://babelradio.000webhostapp.com/flags.png"};
     private ListView list;
     private SearchView searchView;
+    private TextView searchText;
+    private TextView searchNumber;
     private ProgressBar progressBar;
     public static String databaseResponse;
+    public static String subtitle;
     private ArrayList<String> listInput = new ArrayList<>();
     private ArrayList<String> imagesOffset = new ArrayList<String>();
     private ArrayList<Bitmap> images = new ArrayList<Bitmap>();
@@ -38,6 +43,8 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
         progressBar = (ProgressBar)findViewById(R.id.loading);
         list = (ListView) findViewById(R.id.list);
         searchView = (SearchView) findViewById(R.id.search);
+        searchText = (TextView)findViewById(R.id.searchTitle);
+        searchNumber = (TextView)findViewById(R.id.searchNumber);
 
         setupActionBar();
 
@@ -62,6 +69,10 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
 
         progressBar.setVisibility(View.GONE);
         list.setAdapter(adapter);
+        searchText.setVisibility(View.VISIBLE);
+        searchView.setVisibility(View.VISIBLE);
+        searchNumber.setText(String.valueOf(listInput.size()));
+        searchNumber.setVisibility(View.VISIBLE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -80,6 +91,7 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 list.setEnabled(false);
+                subtitle = listInput.get(position);
                 getInput(listInput.get(position));
             }
         });
@@ -103,6 +115,7 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
     @Override
     public void postResult(String asyncResult) {
         Intent myIntent = new Intent(CountriesListActivity.this, RadiosListActivity.class);
+        myIntent.putExtra("Page", 1);
         databaseResponse = asyncResult;
         startActivity(myIntent);
         list.setEnabled(true);
@@ -128,6 +141,7 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle("Countries");
+            actionBar.setSubtitle(ContinentsListActivity.subtitle);
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }

@@ -27,26 +27,63 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Search"
-        android:textSize="26dp"
-        android:layout_marginLeft="10dp"
+        android:textSize="26sp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:textColor="@color/colorPrimary"/>
+        android:textColor="@color/settings"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/searchNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="14sp"
+        android:layout_alignTop="@+id/searchTitle"
+        android:paddingTop="10dp"
+        android:gravity="center"
+        android:textColor="@color/colorWhite"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/searchNextButton"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:text="Next"
+        android:textSize="14sp"
+        android:layout_alignTop="@+id/searchNumber"
+        android:layout_alignParentEnd="true"
+        android:tint="@color/gray"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/searchPrevButton"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:text="Prev"
+        android:textSize="14sp"
+        android:layout_alignTop="@+id/searchNextButton"
+        android:layout_toStartOf="@+id/searchNextButton"
+        android:tint="@color/gray"
+        android:visibility="invisible"/>
 
     <SearchView
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_marginTop="30dp"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:queryHint="Search..."
-        android:layout_below="@+id/searchTitle"/>
+        android:layout_below="@+id/searchTitle"
+        android:visibility="invisible"/>
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/search">
     </ListView>
 </RelativeLayout>

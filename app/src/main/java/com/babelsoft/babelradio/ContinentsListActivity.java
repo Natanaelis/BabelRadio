@@ -12,6 +12,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.ArrayList;
@@ -22,8 +24,11 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
     private String inputUrl = "https://babelradio.000webhostapp.com/countries.php";
     private ListView list;
     private SearchView searchView;
+    private TextView searchText;
+    private TextView searchNumber;
     private ProgressBar progressBar;
     public static String databaseResponse;
+    public static String subtitle;
     private ArrayList<String> listInput = new ArrayList<>();
     private ArrayList<Bitmap> images = new ArrayList<Bitmap>();
     private JSONArray continentsArray = null;
@@ -36,6 +41,8 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
         progressBar = (ProgressBar)findViewById(R.id.loading);
         list = (ListView)findViewById(R.id.list);
         searchView = (SearchView)findViewById(R.id.search);
+        searchText = (TextView)findViewById(R.id.searchTitle);
+        searchNumber = (TextView)findViewById(R.id.searchNumber);
 
         setupActionBar();
 
@@ -68,6 +75,10 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
 
         progressBar.setVisibility(View.GONE);
         list.setAdapter(adapter);
+        searchText.setVisibility(View.VISIBLE);
+        searchView.setVisibility(View.VISIBLE);
+        searchNumber.setText(String.valueOf(listInput.size()));
+        searchNumber.setVisibility(View.VISIBLE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -86,6 +97,7 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 list.setEnabled(false);
+                subtitle = listInput.get(position);
                 getInput(listInput.get(position));
             }
         });
@@ -109,6 +121,7 @@ public class ContinentsListActivity extends AppCompatActivity implements IHttpPo
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle("Continents");
+            actionBar.setSubtitle("");
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
         }

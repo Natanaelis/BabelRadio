@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:text="TextView"
             android:layout_marginLeft="10dp"
-            android:textColor="@color/colorPrimary"/>
+            android:textColor="@color/settings"/>
 
     </LinearLayout>
 </LinearLayout>
