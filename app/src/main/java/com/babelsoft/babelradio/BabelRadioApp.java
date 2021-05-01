@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
@@ -14,6 +15,8 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +28,8 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     private ImageView imgRadioImage;
     private ImageButton btnPlayStop;
     private ImageButton btnFindRadio;
+    private ImageButton btnFavoriteRadio;
+    private ImageButton btnFavoritesList;
     private BroadcastReceiver controlReceiver;
     private String inputUrl = "https://babelradio.000webhostapp.com/continents.php";
     public static String databaseResponse;
@@ -60,6 +65,8 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
         btnNext = (ImageButton) findViewById(R.id.nextButton);
         btnSettings = (ImageButton) findViewById(R.id.settingsButton);
         btnFindRadio = (ImageButton) findViewById(R.id.findRadioButton);
+        btnFavoriteRadio = (ImageButton) findViewById(R.id.favoriteRadioButton);
+        btnFavoritesList = (ImageButton) findViewById(R.id.favoriteListButton);
 
         btnPlayStop.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +100,24 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
             @Override
             public void onClick(View view) {
                 findRadios();
+            }
+        });
+
+        btnFavoriteRadio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InternalDatabaseHandler idh = new InternalDatabaseHandler(BabelRadioApp.this);
+                idh.addRadio(PlayerService.currentRadio);
+                PlayerService.radioList.add(PlayerService.currentRadio);
+                Toast.makeText(getApplicationContext(), PlayerService.currentRadio.getRadioName() + " added to favorites", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnFavoritesList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(BabelRadioApp.this, FavoritesListActivity.class);
+                startActivity(myIntent);
             }
         });
 
@@ -164,7 +189,7 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     }
 
     private void findRadios() {
-        btnFindRadio.setEnabled(false);
+//        btnFindRadio.setEnabled(false);
         Map<String, String> postData = new HashMap<>();
         postData.put("continent", "continent");
         HttpPostAsync httpPost = new HttpPostAsync(postData);
@@ -177,7 +202,7 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
         Intent myIntent = new Intent(BabelRadioApp.this, ContinentsListActivity.class);
         databaseResponse = asyncResult;
         startActivity(myIntent);
-        btnFindRadio.setEnabled(true);
+//        btnFindRadio.setEnabled(true);
     }
 
     @Override

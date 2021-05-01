@@ -4,10 +4,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,10 +15,8 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import java.util.ArrayList;
 
 public class RadiosListActivity extends AppCompatActivity implements IImageAsyncResponse {
@@ -32,6 +28,7 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
     private Button searchNextButton;
     private Button searchPreviousButton;
     private ArrayList<String> listInput = new ArrayList<>();
+    private ArrayList<Integer> ids = new ArrayList<>();
     private ArrayList<String> tags = new ArrayList<>();
     private ArrayList<String> streams = new ArrayList<>();
     private ArrayList<Bitmap> images = new ArrayList<>();
@@ -69,6 +66,7 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
             listInput.add(response);
             tags.add(" ");
             images.add(BitmapFactory.decodeResource(this.getResources(), R.drawable.error));
+            listView.setClickable(false);
             showList();
         }
     }
@@ -79,6 +77,7 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
         try {
             for (int i = arrayStart; i <= arrayEnd; i++) {
                 listInput.add(radiosArray.getJSONObject(i).getString("radio_name"));
+                ids.add(Integer.parseInt(radiosArray.getJSONObject(i).getString("radio_id")));
                 tags.add(radiosArray.getJSONObject(i).getString("radio_tag"));
                 streams.add(radiosArray.getJSONObject(i).getString("radio_stream"));
                 imagesUrl.add(radiosArray.getJSONObject(i).getString("radio_image"));
@@ -90,7 +89,7 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
     }
 
     private void showList() {
-        final ListsAdapter adapter = new ListsAdapter(this, listInput, tags, streams, images);
+        final ListsAdapter adapter = new ListsAdapter(this, listInput, tags, streams, ids, images);
 
         listView.setAdapter(adapter);
         progressBar.setVisibility(View.INVISIBLE);
@@ -121,17 +120,18 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Radio newRadio = new Radio(PlayerService.radioList.size() + 1,
-                            PlayerService.radioList.size() + 1,
+                if (listView.isClickable()) {
+                    stopPlayRadio();
+                    Radio newRadio = new Radio(PlayerService.radioList.size() + 1,
+                            ids.get(position),
                             listInput.get(position),
                             tags.get(position),
                             DbBitmapUtility.getBytes(images.get(position)),
                             streams.get(position));
-                PlayerService.currentRadio = newRadio;
-                NavUtils.navigateUpTo(RadiosListActivity.this, new Intent(getBaseContext(), BabelRadioApp.class));
-
-                stopPlayRadio();
-                startPlayRadio();
+                    PlayerService.currentRadio = newRadio;
+                    NavUtils.navigateUpTo(RadiosListActivity.this, new Intent(getBaseContext(), BabelRadioApp.class));
+                    startPlayRadio();
+                }
             }
         });
 
@@ -187,6 +187,7 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
         }
         progressBar.setProgress(images.size());
         if (images.size() == imagesUrl.size()) {
+            listView.setClickable(true);
             showList();
         }
     }
@@ -205,33 +206,6 @@ public class RadiosListActivity extends AppCompatActivity implements IImageAsync
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-/*        if (listInput != null) {
-            listInput.clear();
-            listInput = null;
-        }
-        if (tags != null) {
-            tags.clear();
-            tags = null;
-        }
-        if (streams != null) {
-            streams.clear();
-            streams = null;
-        }
-        if (images != null) {
-            images.clear();
-            images = null;
-        }
-        if (imagesUrl != null) {
-            imagesUrl.clear();
-            imagesUrl = null;
-        }
-        if (radiosArray != null) {
-            radiosArray = null;
-        }
-        if (response != null) {
-            response = null;
-        }
-*/
         finish();
         Runtime.getRuntime().gc();
     }

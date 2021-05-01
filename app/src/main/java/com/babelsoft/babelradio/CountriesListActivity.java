@@ -23,7 +23,7 @@ import java.util.Map;
 public class CountriesListActivity extends AppCompatActivity implements IHttpPostAsyncResponse, IImageAsyncResponse {
     private String inputUrl = "https://babelradio.000webhostapp.com/radios.php";
     private String[] flagsUrl = {"https://babelradio.000webhostapp.com/flags.png"};
-    private ListView list;
+    private ListView listView;
     private SearchView searchView;
     private TextView searchText;
     private TextView searchNumber;
@@ -41,14 +41,13 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_view);
         progressBar = (ProgressBar)findViewById(R.id.loading);
-        list = (ListView) findViewById(R.id.list);
+        listView = (ListView) findViewById(R.id.list);
         searchView = (SearchView) findViewById(R.id.search);
         searchText = (TextView)findViewById(R.id.searchTitle);
         searchNumber = (TextView)findViewById(R.id.searchNumber);
 
         setupActionBar();
 
-        listInput.clear();
         response = ContinentsListActivity.databaseResponse;
         try {
             countriesArray = new JSONArray(response);
@@ -60,6 +59,7 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
         } catch (JSONException e) {
             listInput.add(response);
             images.add(BitmapFactory.decodeResource(this.getResources(), R.drawable.error));
+            listView.setClickable(false);
             showList();
         }
     }
@@ -68,7 +68,7 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
         final ListsAdapter adapter = new ListsAdapter(this, listInput, images);
 
         progressBar.setVisibility(View.GONE);
-        list.setAdapter(adapter);
+        listView.setAdapter(adapter);
         searchText.setVisibility(View.VISIBLE);
         searchView.setVisibility(View.VISIBLE);
         searchNumber.setText(String.valueOf(listInput.size()));
@@ -86,13 +86,15 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
             }
         });
 
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                list.setEnabled(false);
-                subtitle = listInput.get(position);
-                getInput(listInput.get(position));
+                if (listView.isClickable()) {
+                    listView.setClickable(false);
+                    subtitle = listInput.get(position);
+                    getInput(listInput.get(position));
+                }
             }
         });
     }
@@ -118,7 +120,7 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
         myIntent.putExtra("Page", 1);
         databaseResponse = asyncResult;
         startActivity(myIntent);
-        list.setEnabled(true);
+        listView.setClickable(true);
     }
 
     @Override
@@ -161,28 +163,6 @@ public class CountriesListActivity extends AppCompatActivity implements IHttpPos
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-/*        if(listInput != null) {
-            listInput.clear();
-            listInput = null;
-        }
-        if(imagesOffset != null) {
-            imagesOffset.clear();
-            imagesOffset = null;
-        }
-        if(images != null) {
-            images.clear();
-            images = null;
-        }
-        if(countriesArray != null) {
-            countriesArray = null;
-        }
-        if(response != null) {
-            response = null;
-        }
-        if (databaseResponse != null) {
-            databaseResponse = null;
-        }
-*/
         finish();
         Runtime.getRuntime().gc();
     }

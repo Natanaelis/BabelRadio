@@ -32,6 +32,7 @@
         <activity android:name=".ContinentsListActivity" android:theme="@style/Theme.AppCompat" />
         <activity android:name=".CountriesListActivity" android:theme="@style/Theme.AppCompat" />
         <activity android:name=".RadiosListActivity" android:theme="@style/Theme.AppCompat" />
+        <activity android:name=".FavoritesListActivity" android:theme="@style/Theme.AppCompat" />
 
         <!-- This can be used to run boot service on first lock screen
         <receiver android:name="com.babelsoft.babelradio.BootServiceReceiver"

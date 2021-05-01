@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +25,6 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_RADIOS_TABLE = "CREATE TABLE " + TABLE_RADIOS + "("
@@ -33,35 +34,31 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_RADIOS_TABLE);
     }
 
-    // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_RADIOS);
-
         // Create tables again
         onCreate(db);
     }
 
-    // code to add the new radio
-    void addRadio(Radio radio) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    public void addRadio(Radio radio) {
+        if (!exists(radio)) {
+            SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(KEY_RADIO_ID, radio.getRadioId());
-        values.put(KEY_RADIO_NAME, radio.getRadioName());
-        values.put(KEY_RADIO_TAG, radio.getRadioTag());
-        values.put(KEY_RADIO_IMAGE, radio.getRadioImage());
-        values.put(KEY_RADIO_STREAM, radio.getRadioStream());
+            ContentValues values = new ContentValues();
+            values.put(KEY_RADIO_ID, radio.getRadioId());
+            values.put(KEY_RADIO_NAME, radio.getRadioName());
+            values.put(KEY_RADIO_TAG, radio.getRadioTag());
+            values.put(KEY_RADIO_IMAGE, radio.getRadioImage());
+            values.put(KEY_RADIO_STREAM, radio.getRadioStream());
 
-        // Inserting Row
-        db.insert(TABLE_RADIOS, null, values);
-        //2nd argument is String containing nullColumnHack
-        db.close(); // Closing database connection
+            db.insert(TABLE_RADIOS, null, values);
+            db.close();
+        }
     }
 
-    // code to get the single radio
-    Radio getRadio(int id) {
+    public Radio getRadio(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_RADIOS, new String[] { KEY_RADIO_INTERNAL_ID,
@@ -74,31 +71,24 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         Radio radio = new Radio(Integer.parseInt(cursor.getString(0)),
                 Integer.parseInt(cursor.getString(1)), cursor.getString(2),
                 cursor.getString(3), cursor.getBlob(4), cursor.getString(5));
-        // return contact
         return radio;
     }
 
-    // code to get all radios in a list view
     public List<Radio> getAllRadios() {
         List<Radio> radioList = new ArrayList<Radio>();
-        // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_RADIOS;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
                 Radio radio = new Radio(Integer.parseInt(cursor.getString(0)),
                         Integer.parseInt(cursor.getString(1)), cursor.getString(2),
                         cursor.getString(3), cursor.getBlob(4), cursor.getString(5));
-                // Adding radio to list
                 radioList.add(radio);
             } while (cursor.moveToNext());
         }
-
-        // return radio list
         return radioList;
     }
 /*
@@ -115,7 +105,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
                 new String[] { String.valueOf(contact.getID()) });
     }
 */
-    // Deleting single radio
+
     public void deleteRadio(Radio radio) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_RADIOS, KEY_RADIO_INTERNAL_ID + " = ?",
@@ -123,7 +113,7 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    // Getting radios Count
+
     public int count() {
         int count;
         String countQuery = "SELECT  * FROM " + TABLE_RADIOS;
@@ -131,9 +121,16 @@ public class InternalDatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(countQuery, null);
         count = cursor.getCount();
         cursor.close();
-
-        // return count
         return count;
     }
 
+    public boolean exists(Radio newRadio) {
+        boolean exists = false;
+        List<Radio> allRadios = getAllRadios();
+        for (Radio radio : allRadios) {
+            if (radio.getRadioId() == newRadio.getRadioId())
+                return true;
+        }
+        return exists;
+    }
 }

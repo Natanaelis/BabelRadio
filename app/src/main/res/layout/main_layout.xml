@@ -13,35 +13,58 @@
             android:id="@+id/settingsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="-215dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="-40dp"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="-195dp"
-            android:scaleX="0.075"
-            android:scaleY="0.075"
+            android:layout_marginTop="-15dp"
+            android:scaleX="0.35"
+            android:scaleY="0.35"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@drawable/settings" />
+            app:srcCompat="@drawable/settings_small" />
 
         <ImageButton
             android:id="@+id/findRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="-215dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="-195dp"
-            android:scaleX="0.075"
-            android:scaleY="0.075"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="-40dp"
+            android:layout_alignBottom="@id/txtPlayerStatusTextView"
+            android:layout_marginBottom="-30dp"
+            android:scaleX="0.35"
+            android:scaleY="0.35"
             android:background="?attr/selectableItemBackground"
-            app:srcCompat="@drawable/worldwide" />
+            app:srcCompat="@drawable/worldwide_small" />
+
+        <ImageButton
+            android:id="@+id/favoriteListButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignBottom="@id/findRadioButton"
+            android:scaleX="0.35"
+            android:scaleY="0.35"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@drawable/favorite_list_small" />
+
+        <ImageButton
+            android:id="@+id/favoriteRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="0dp"
+            android:layout_alignBottom="@id/findRadioButton"
+            android:scaleX="0.35"
+            android:scaleY="0.35"
+            android:background="?attr/selectableItemBackground"
+            app:srcCompat="@drawable/favorite_small" />
 
         <TextView
             android:id="@+id/channelTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="180dp"
-            android:textSize="24dp"
+            android:layout_marginTop="150dp"
+            android:textSize="28sp"
             android:textStyle="bold"
             android:text="Radio Channel"
             android:singleLine="true"
@@ -54,11 +77,10 @@
 
         <ImageView
             android:id="@+id/radioImage"
-            android:layout_width="300dp"
-            android:layout_height="168dp"
-            android:padding="5dp"
+            android:layout_width="160dp"
+            android:layout_height="85dp"
             android:layout_below="@+id/channelTextView"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="5dp"
             android:layout_centerHorizontal="true"
             app:srcCompat="@drawable/nologo" />
 
@@ -67,9 +89,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/radioImage"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             android:layout_centerHorizontal="true"
-            android:textSize="18dp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:text="Artist"
             android:singleLine="true"
@@ -87,7 +109,7 @@
             android:layout_below="@+id/txtArtistTextView"
             android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
-            android:textSize="18dp"
+            android:textSize="18sp"
             android:textStyle="normal"
             android:text="Title"
             android:singleLine="true"
@@ -113,7 +135,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/playStopButton"
-            android:layout_toLeftOf="@+id/playStopButton"
+            android:layout_toStartOf="@+id/playStopButton"
             android:background="?attr/selectableItemBackground"
             app:srcCompat="@drawable/button_rewind" />
 
@@ -122,7 +144,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/playStopButton"
-            android:layout_toRightOf="@+id/playStopButton"
+            android:layout_toEndOf="@+id/playStopButton"
             android:background="?attr/selectableItemBackground"
             app:srcCompat="@drawable/button_forward" />
 
@@ -142,7 +164,7 @@
             android:layout_above="@+id/separation"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="15dp"
-            android:textSize="16dp"
+            android:textSize="16sp"
             android:textStyle="normal"
             android:text="Status"
             android:textColor="@color/colorWhite" />

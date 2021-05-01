@@ -15,8 +15,6 @@ import java.util.Locale;
 public class ListsAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
-//    private final Integer[] imgid;
-//    private final Integer imgid;
     private final ArrayList<String> listInputBeforeFilter = new ArrayList<>();
     private final ArrayList<String> listInputAfterFilter;
     private final ArrayList<String> tagsBeforeFilter = new ArrayList<>();
@@ -25,18 +23,17 @@ public class ListsAdapter extends ArrayAdapter<String> {
     private final ArrayList<String> streamsAfterFilter;
     private final ArrayList<Bitmap> imagesBeforeFilter = new ArrayList<>();
     private final ArrayList<Bitmap> imagesAfterFilter;
+    private final ArrayList<Integer> idsBeforeFilter = new ArrayList<>();
+    private final ArrayList<Integer> idsAfterFilter;
 
-//    public ListsAdapter(Activity context, ArrayList<String> listInput, Integer imgid) {
     public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<Bitmap> images) {
-//        this(context, listInput, null, null, imgid);
-        this(context, listInput, null, null, images);
+        this(context, listInput, null, null, null, images);
     }
 
-//    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams, Integer imgid) {
-    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams, ArrayList<Bitmap> images) {
+    public ListsAdapter(Activity context, ArrayList<String> listInput, ArrayList<String> tags, ArrayList<String> streams,
+                        ArrayList<Integer> ids, ArrayList<Bitmap> images) {
         super(context, R.layout.list, listInput);
         this.context = context;
-//        this.imgid = imgid;
 
         listInputBeforeFilter.addAll(listInput);
         listInputAfterFilter = listInput;
@@ -45,9 +42,11 @@ public class ListsAdapter extends ArrayAdapter<String> {
         if (tags != null) {
             tagsBeforeFilter.addAll(tags);
             streamsBeforeFilter.addAll(streams);
+            idsBeforeFilter.addAll(ids);
         }
         tagsAfterFilter = tags;
         streamsAfterFilter = streams;
+        idsAfterFilter = ids;
     }
 
     public View getView(int position, View view, ViewGroup parent) {
@@ -71,7 +70,6 @@ public class ListsAdapter extends ArrayAdapter<String> {
         }
         titleText.setLayoutParams(params);
         titleText.setText(listInputAfterFilter.get(position));
-//        imageView.setImageResource(imgid);
         imageView.setImageBitmap(imagesAfterFilter.get(position));
 
         return rowView;
@@ -81,16 +79,20 @@ public class ListsAdapter extends ArrayAdapter<String> {
         charText = charText.toLowerCase(Locale.getDefault());
         listInputAfterFilter.clear();
         imagesAfterFilter.clear();
-        if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
+        if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName()) ||
+            context.getLocalClassName().equals(FavoritesListActivity.class.getSimpleName())) {
             tagsAfterFilter.clear();
             streamsAfterFilter.clear();
+            idsAfterFilter.clear();
         }
         if (charText.length() == 0) {
             listInputAfterFilter.addAll(listInputBeforeFilter);
             imagesAfterFilter.addAll(imagesBeforeFilter);
-            if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
+            if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName()) ||
+                context.getLocalClassName().equals(FavoritesListActivity.class.getSimpleName())) {
                 tagsAfterFilter.addAll(tagsBeforeFilter);
                 streamsAfterFilter.addAll(streamsBeforeFilter);
+                idsAfterFilter.addAll(idsBeforeFilter);
             }
         }
         else {
@@ -98,9 +100,11 @@ public class ListsAdapter extends ArrayAdapter<String> {
                 if (listInputBeforeFilter.get(i).toLowerCase(Locale.getDefault()).contains(charText)) {
                     listInputAfterFilter.add(listInputBeforeFilter.get(i));
                     imagesAfterFilter.add(imagesBeforeFilter.get(i));
-                    if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName())) {
+                    if (context.getLocalClassName().equals(RadiosListActivity.class.getSimpleName()) ||
+                        context.getLocalClassName().equals(FavoritesListActivity.class.getSimpleName())) {
                         tagsAfterFilter.add(tagsBeforeFilter.get(i));
                         streamsAfterFilter.add(streamsBeforeFilter.get(i));
+                        idsAfterFilter.add(idsBeforeFilter.get(i));
                     }
                 }
             }

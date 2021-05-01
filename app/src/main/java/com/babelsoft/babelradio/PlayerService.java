@@ -77,7 +77,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         initializeControlReceiver();
         initializeAudioChangeFocus();
         initializeMediaButtons();
-        resetArtistTitle();
+//        resetArtistTitle();
         playerStatusChanged(PlayerStatus.READY);
         rememberStartupVolume();
         updateNotificationStatus();
@@ -644,7 +644,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             currentRadio = new Radio(0, 0, "No Radio Stations to play",
                     "", DbBitmapUtility.getBytes(image), "");
             currentRadio.setRadioArtist("Add New Radio Station");
-            currentRadio.setRadioTitle("Use top right button to find and add radio");
+            currentRadio.setRadioTitle("Use bottom left button to find and add radio");
         }
     }
 
