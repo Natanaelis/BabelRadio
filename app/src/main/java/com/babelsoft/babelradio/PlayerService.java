@@ -57,7 +57,6 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     private Timer updateA2dpDisplayTimer;
     private Timer downloadMetaDataTimer;
     private CountDownTimer reBufferingTimer;
-    private Radio radioZlotePrzeboje, radioZET, rmfFM, smoothJazz, p7klem; // TODO It will be moved to server
     private Notification.Builder builder;
     private final int notificationId = 78;
 
@@ -77,7 +76,6 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         initializeControlReceiver();
         initializeAudioChangeFocus();
         initializeMediaButtons();
-//        resetArtistTitle();
         playerStatusChanged(PlayerStatus.READY);
         rememberStartupVolume();
         updateNotificationStatus();
@@ -340,7 +338,6 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             updateA2dpDisplayTimer = null;
         }
         if (playerStatus != PlayerStatus.PLAYING) {
-//            displayText = channelName + " (" + playerStatus.getText() + ")";
             displayText = currentRadio.getRadioName() + " (" + playerStatus.getText() + ")";
             updateA2dpDisplay(displayText);
         }
@@ -352,27 +349,22 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
                 public void run() {
                     switch (mode) {
                         case PLAYING:
-//                            displayText = channelName + " (" + playerStatus.getText() + ")";
                             displayText = currentRadio.getRadioName() + " (" + playerStatus.getText() + ")";
                             mode = DisplayMode.ARTIST;
                             break;
                         case ARTIST:
-//                            displayText = artistText;
                             displayText = currentRadio.getRadioArtist();
                             mode = DisplayMode.TITLE;
                             break;
                         case TITLE:
-//                            displayText = titleText;
                             displayText = currentRadio.getRadioTitle();
                             mode = DisplayMode.TAG;
                             break;
                         case TAG:
-//                            displayText = radioList.get(currentRadioNumber).getRadioTag();
                             displayText = currentRadio.getRadioTag();
                             mode = DisplayMode.BITRATE;
                             break;
                         case BITRATE:
-//                            displayText = radioList.get(currentRadioNumber).getRadioBitrate();
                             displayText = currentRadio.getRadioBitrate();
                             mode = DisplayMode.PLAYING;
                             break;
@@ -394,7 +386,6 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
                 MetadataTask mt = new MetadataTask();
                 mt.delegate = PlayerService.this;
                 try {
-//                    mt.execute(new URL(radioList.get(currentRadioNumber).getRadioStream()));
                     mt.execute(new URL(currentRadio.getRadioStream()));
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -547,36 +538,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             reBufferingTimer = null;
         }
     }
-/*
-    // TODO To be moved to server
-    private void registerChannels() {
-        radioZlotePrzeboje = new Radio(1,1,"Radio Złote Przeboje",
-                "Oldies", R.drawable.logo_radio_zlote_przeboje,
-                "http://gdansk1-1.radio.pionier.net.pl:8000/pl/tuba9-1.mp3");
-        radioZET = new Radio(2, 2, "Radio ZET",
-                "Adult Contemporary", R.drawable.logo_radio_zet,
-                "https://zt.cdn.eurozet.pl/zet-net.mp3");
-        rmfFM = new Radio(3, 3, "RMF FM",
-                "Adult Contemporary", R.drawable.logo_rmf,
-                "http://31.192.216.8:8000/rmf_fm");
-        smoothJazz = new Radio(4, 4, "Smooth Jazz",
-                "Smooth Jazz", R.drawable.logo_smooth_jazz,
-                "http://79.143.187.96:8090/128stream");
-        p7klem = new Radio(5, 5, "P7 Klem",
-                "Oldies", R.drawable.logo_p7_klem,
-                "https://p7.p4groupaudio.com/P07_MM");
-        radioList.add(radioZlotePrzeboje);
-        radioList.add(radioZET);
-        radioList.add(rmfFM);
-        radioList.add(smoothJazz);
-        radioList.add(p7klem);
 
-        InternalDatabaseHandler db = new InternalDatabaseHandler(this);
-
-        int countRadios = db.count();
-        Log.e("Number of radios", String.valueOf(countRadios));
-    }
-*/
     private void playBeep(Beep beep) {
         MediaPlayer mpBeep;
         if (beep == Beep.BUFFERING) mpBeep = MediaPlayer.create(this, R.raw.beep_low_3x);

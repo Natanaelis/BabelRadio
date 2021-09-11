@@ -160,14 +160,11 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     }
 
     private void updateScreenArtistTitle() {
-//        txtArtistTextView.setText(PlayerService.artistText);
-//        txtTitleTextView.setText(PlayerService.titleText);
         txtArtistTextView.setText(PlayerService.currentRadio.getRadioArtist());
         txtTitleTextView.setText(PlayerService.currentRadio.getRadioTitle());
     }
 
     private void updateScreenStatus() {
-//        String channelTextNew = PlayerService.channelName;
         String channelTextNew = PlayerService.currentRadio.getRadioName();
         String channelTextOld = txtChannel.getText().toString();
         if (channelTextNew != null && !channelTextNew.equals(channelTextOld)) {
@@ -189,12 +186,14 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
     }
 
     private void findRadios() {
-//        btnFindRadio.setEnabled(false);
-        Map<String, String> postData = new HashMap<>();
-        postData.put("continent", "continent");
-        HttpPostAsync httpPost = new HttpPostAsync(postData);
-        httpPost.delegate = this;
-        httpPost.execute(inputUrl);
+        if (btnFindRadio.isClickable()) {
+            btnFindRadio.setClickable(false);
+            Map<String, String> postData = new HashMap<>();
+            postData.put("continent", "continent");
+            HttpPostAsync httpPost = new HttpPostAsync(postData);
+            httpPost.delegate = this;
+            httpPost.execute(inputUrl);
+        }
     }
 
     @Override
@@ -202,7 +201,7 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
         Intent myIntent = new Intent(BabelRadioApp.this, ContinentsListActivity.class);
         databaseResponse = asyncResult;
         startActivity(myIntent);
-//        btnFindRadio.setEnabled(true);
+        btnFindRadio.setClickable(true);
     }
 
     @Override
