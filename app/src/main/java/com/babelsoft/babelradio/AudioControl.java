@@ -67,3 +67,4 @@ public class AudioControl {
         return audioManager.isBluetoothA2dpOn();
     }
 }
+
