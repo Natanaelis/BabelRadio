@@ -10,8 +10,6 @@ public class AudioControl {
     private int startupVolume;
     private final Context context;
 
-    private final String TAG = "Test";
-
     public AudioControl(Context ctx) {
         context = ctx;
         audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
