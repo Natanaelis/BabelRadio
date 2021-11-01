@@ -25,6 +25,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RemoteViews;
 import java.io.IOException;
@@ -68,6 +69,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     public void onCreate() {
         loadRadios();
         loadSettings();
+        loadCurrentRadio();
         initiateNotification();
         showNotification();
         initializeVolumeControl();
@@ -564,13 +566,14 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
 
     private void loadSettings() {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+    private void loadCurrentRadio() {
         currentRadioNumber = preferences.getInt(Settings.CURRENT_RADIO_NUMBER.name(), 0);
         if (currentRadioNumber > radioList.size() - 1) {
             currentRadioNumber = 0;
         }
-        else {
-            currentRadio = radioList.get(currentRadioNumber);
-        }
+        currentRadio = radioList.get(currentRadioNumber);
     }
 
     private void loadRadios() {
