@@ -25,7 +25,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.RemoteViews;
 import java.io.IOException;
@@ -57,7 +56,6 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     private Timer downloadMetaDataTimer;
     private CountDownTimer reBufferingTimer;
     private Notification.Builder notificationBuilder;
-    private final int notificationId = 78;
 
     @Nullable
     @Override
@@ -118,7 +116,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
                 .setAutoCancel(false)
                 .setOngoing(true);
 
-        startForeground(notificationId, notificationBuilder.build());
+        startForeground(Integer.parseInt(getResources().getString(R.string.notification_id)), notificationBuilder.build());
     }
 
     private void initializeVolumeControl() {
@@ -304,7 +302,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         notificationView.setTextViewText(R.id.title_text, currentRadio.getRadioTitle());
 
         notificationBuilder.setCustomContentView(notificationView);
-        startForeground(notificationId, notificationBuilder.build());
+        startForeground(Integer.parseInt(getResources().getString(R.string.notification_id)), notificationBuilder.build());
     }
 
     private void updateNotificationStatus() {
@@ -316,7 +314,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         else notificationView.setImageViewResource(R.id.play_stop_button, R.drawable.button_stop);
 
         notificationBuilder.setCustomContentView(notificationView);
-        startForeground(notificationId, notificationBuilder.build());
+        startForeground(Integer.parseInt(getResources().getString(R.string.notification_id)), notificationBuilder.build());
     }
 
     private void playDummyAudio() {
@@ -421,7 +419,7 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     }
 
     private void onPlayClick() {
-        if (playerStatus == PlayerStatus.READY) {
+        if (playerStatus == PlayerStatus.READY && !currentRadio.getRadioTag().equals(getResources().getString(R.string.dummy_radio))) {
             playBeep(Beep.BUFFERING);
             playRadio();
         }
@@ -442,8 +440,8 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     }
 
     private void onPreviousClick() {
-        playBeep(Beep.PREVIOUS);
-        if (radioList.size() > 0) {
+        if (!currentRadio.getRadioTag().equals(getResources().getString(R.string.dummy_radio)) && radioList.size() > 1) {
+            playBeep(Beep.PREVIOUS);
             if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
                 currentRadioNumber--;
                 if (currentRadioNumber < 0) {
@@ -466,8 +464,8 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
     }
 
     private void onNextClick() {
-        playBeep(Beep.NEXT);
-        if (radioList.size() > 0) {
+        if (!currentRadio.getRadioTag().equals(getResources().getString(R.string.dummy_radio)) && radioList.size() > 1) {
+            playBeep(Beep.NEXT);
             if (playerStatus != PlayerStatus.INTERRUPTED_PAUSE) {
                 currentRadioNumber++;
                 if (currentRadioNumber > radioList.size() - 1 ) {
@@ -573,7 +571,9 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
         if (currentRadioNumber > radioList.size() - 1) {
             currentRadioNumber = 0;
         }
-        currentRadio = radioList.get(currentRadioNumber);
+        if (radioList.size() > 0) {
+            currentRadio = radioList.get(currentRadioNumber);
+        }
     }
 
     private void loadRadios() {
@@ -584,14 +584,21 @@ public class PlayerService extends Service implements IMetadataAsyncResponse{
             radioList = internalDatabaseHandler.getAllRadios();
         }
         else {
-            Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.nologo);
-
-
-            currentRadio = new Radio(0, 0, "No Radio Stations to play",
-                    "", DbBitmapUtility.getBytes(image), "");
-            currentRadio.setRadioArtist("Add New Radio Station");
-            currentRadio.setRadioTitle("Use bottom left button to find and add radio");
+            currentRadio = loadDummyRadio();
         }
+
+    }
+
+    private Radio loadDummyRadio() {
+        Radio dummyRadio;
+
+        Bitmap image = BitmapFactory.decodeResource(this.getResources(), R.drawable.nologo);
+        dummyRadio = new Radio(0, 0, "No Radio Stations to play",
+                getResources().getString(R.string.dummy_radio), DbBitmapUtility.getBytes(image), "");
+        dummyRadio.setRadioArtist("Add New Radio Station");
+        dummyRadio.setRadioTitle("Use bottom left button to find and add radio");
+
+        return dummyRadio;
     }
 
     private void autoPlay() {

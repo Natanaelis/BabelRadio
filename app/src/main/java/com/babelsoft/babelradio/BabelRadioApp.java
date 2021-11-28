@@ -106,10 +106,12 @@ public class BabelRadioApp extends AppCompatActivity implements IHttpPostAsyncRe
         btnFavoriteRadio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                InternalDatabaseHandler idh = new InternalDatabaseHandler(BabelRadioApp.this);
-                idh.addRadio(PlayerService.currentRadio);
-                PlayerService.radioList.add(PlayerService.currentRadio);
-                Toast.makeText(getApplicationContext(), PlayerService.currentRadio.getRadioName() + " added to favorites", Toast.LENGTH_SHORT).show();
+                if (!PlayerService.currentRadio.getRadioTag().equals(getResources().getString(R.string.dummy_radio))) {
+                    InternalDatabaseHandler idh = new InternalDatabaseHandler(BabelRadioApp.this);
+                    idh.addRadio(PlayerService.currentRadio);
+                    PlayerService.radioList.add(PlayerService.currentRadio);
+                    Toast.makeText(getApplicationContext(), PlayerService.currentRadio.getRadioName() + " added to favorites", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
